@@ -17,6 +17,8 @@ const SellerLayout = () => {
       icon: assets.product_list_icon,
     },
     { name: "Orders", path: "/seller/dashboard/orders", icon: assets.order_icon },
+    { name: "Delivery List", path: "/seller/dashboard/delivery-list", icon: assets.product_list_icon },
+    { name: "Create Delivery", path: "/seller/dashboard/create-delivery", icon: assets.add_icon },
     { name: "User-list", path: "/seller/dashboard/user-list", icon: assets.product_list_icon },
   ];
 

@@ -16,6 +16,7 @@ import addressRouter from './routes/addressRoute.js';
 import orderRoute from './routes/orderRoute.js';
 import contactRouter from './routes/contactRoute.js';
 import logsRouter from './routes/logsRoute.js';
+import deliveryRouter from './routes/deliveryRoute.js';
 import { Stripewebhooks } from './controllers/orderController.js';
 
 const app = express();
@@ -50,6 +51,7 @@ app.use('/api/address', addressRouter);
 app.use('/api/order', orderRoute);
 app.use('/api/contact', contactRouter);
 app.use('/api/logs', logsRouter);
+app.use('/api/delivery', deliveryRouter);
 
 // ---------- Optional: Serve frontend from backend ----------
 // Only use if you want a single URL for frontend + backend

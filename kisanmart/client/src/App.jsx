@@ -23,9 +23,18 @@ import About from './Pages/About'
 import ContactUs from './Pages/ContactUs'
 import UserList from './Pages/Seller/UserList'
 
+import DeliveryLogin from './Pages/Delivery/DeliveryLogin'
+import DeliveryLayout from './Pages/Delivery/DeliveryLayout'
+import DeliveryOrders from './Pages/Delivery/Orders'
+import DeliveryRegister from './Pages/Delivery/DeliveryRegister'
+import DeliveryClaim from './Pages/Delivery/Claim'
+import DeliveryProfile from './Pages/Delivery/Profile'
+import DeliveryList from './Pages/Seller/DeliveryList'
+import CreateDelivery from './Pages/Seller/CreateDelivery'
+
 const App = () => {
   const isSellerPath = useLocation().pathname.includes("seller")
-  const { showUserLogin, isSeller } = useAppContext()
+  const { showUserLogin, isSeller, isDelivery } = useAppContext()
 
   return (
     <div className='text-default min-h-screen text-gray-700 bg-white'>
@@ -78,8 +87,20 @@ const App = () => {
             <Route index element={<AdminProfile/>} />
             <Route path="add-product" element={<AddProduct />} />
             <Route path="product-list" element={<ProductList />} />
+            <Route path="delivery-list" element={<DeliveryList />} />
+            <Route path="create-delivery" element={<CreateDelivery />} />
             <Route path="user-list" element={<UserList/>} />
             <Route path="orders" element={<Orders />} />
+          </Route>
+
+          {/* Delivery Routes */}
+          <Route path="/delivery" element={<Navigate to="/delivery/login" />} />
+          <Route path="/delivery/register" element={<DeliveryRegister />} />
+          <Route path="/delivery/login" element={<DeliveryLogin />} />
+          <Route path="/delivery/claim" element={<DeliveryClaim />} />
+          <Route path="/delivery/dashboard" element={isDelivery ? <DeliveryLayout /> : <Navigate to="/delivery/login" />}>
+            <Route index element={<DeliveryProfile />} />
+            <Route path="orders" element={<DeliveryOrders />} />
           </Route>
         </Routes>
       </div>

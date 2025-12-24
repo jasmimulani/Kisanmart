@@ -7,6 +7,7 @@ const Orders = () => {
    const {currency ,axios} = useAppContext()
    const [orders,setOrders] = useState([])
    const [loading, setLoading] = useState(false)
+   const [deliveryBoys, setDeliveryBoys] = useState([])
 
    const fetchOrders = async () =>{
     setLoading(true)
@@ -25,8 +26,18 @@ const Orders = () => {
         setLoading(false)
     }
    };
+
+   const fetchDeliveryBoys = async () => {
+    try {
+      const { data } = await axios.get('/api/delivery/list')
+      if (data.success) setDeliveryBoys(data.list || [])
+    } catch (error) {
+      console.error('Error fetching delivery boys', error)
+    }
+   }
 useEffect(() =>{
     fetchOrders();
+    fetchDeliveryBoys();
     // Auto-refresh orders every 5 seconds to catch payment updates from webhook
     const interval = setInterval(fetchOrders, 5000);
     return () => clearInterval(interval);
@@ -72,6 +83,24 @@ useEffect(() =>{
                                 </div>
                             ))}
                         </div>
+                    </div>
+
+                    <div className="flex gap-2 items-center">
+                      <select className="border p-1 rounded" defaultValue={order.deliveryBoyId || ''} onChange={(e)=>{order._selectedDelivery = e.target.value}}>
+                        <option value="">-- Assign delivery --</option>
+                        {deliveryBoys.map((d)=> (
+                          <option key={d._id} value={d._id}>{d.name} - {d.phone || d.email}</option>
+                        ))}
+                      </select>
+                      <button onClick={async ()=>{
+                        const deliveryBoyId = order._selectedDelivery
+                        if(!deliveryBoyId){ toast.error('select delivery boy') ; return }
+                        try {
+                          const {data} = await axios.put('/api/delivery/assign', { orderId: order._id, deliveryBoyId })
+                          if(data.success){ toast.success(data.message || 'Assigned') ; fetchOrders() }
+                          else toast.error(data.message)
+                        } catch (error) { toast.error(error.message) }
+                      }} className="px-2 py-1 border rounded">Assign</button>
                     </div>
 
                     <div className="text-sm md:text-base text-black/60">

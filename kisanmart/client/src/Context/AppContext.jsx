@@ -15,6 +15,10 @@ export const AppContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isSeller, setIsSeller] = useState(false);
   const [sellerProfile, setSellerProfile] = useState(null);
+
+  // Delivery boy auth state
+  const [isDelivery, setIsDelivery] = useState(false);
+  const [deliveryProfile, setDeliveryProfile] = useState(null);
   const [showUserLogin, SetShowUserLogin] = useState(false);
   const [products, SetProducts] = useState([]);
 
@@ -39,6 +43,45 @@ export const AppContextProvider = ({ children }) => {
       setSellerProfile(null);
     }
   };
+
+  // fetch delivery-boy auth status
+  const fetchDelivery = async () => {
+    try {
+      const { data } = await axios.get('/api/delivery/is-auth')
+      if (data.success) {
+        setIsDelivery(true)
+        setDeliveryProfile(data.profile || null)
+      } else {
+        setIsDelivery(false)
+        setDeliveryProfile(null)
+      }
+    } catch (error) {
+      setIsDelivery(false)
+      setDeliveryProfile(null)
+    }
+  }
+
+  // admin: fetch delivery-boys list
+  const fetchDeliveryList = async () => {
+    try {
+      const { data } = await axios.get('/api/delivery/list')
+      if (data.success) return data.list
+      throw new Error(data.message || 'Unable to fetch')
+    } catch (error) {
+      throw error
+    }
+  }
+
+  // admin: create delivery boy (returns temp password and token)
+  const createDeliveryByAdmin = async (payload) => {
+    try {
+      const { data } = await axios.post('/api/delivery/create', payload)
+      if (data.success) return data
+      throw new Error(data.message || 'Unable to create')
+    } catch (error) {
+      throw error
+    }
+  }
 
   //  fetch user auth status , user data and cart item
 
@@ -154,6 +197,7 @@ export const AppContextProvider = ({ children }) => {
   useEffect(() => {
     fetchUser();
     fetchSeller();
+    fetchDelivery();
     fetchProducts();
   }, []);
 
@@ -183,6 +227,10 @@ export const AppContextProvider = ({ children }) => {
     isSeller,
     sellerProfile,
     setSellerProfile,
+    isDelivery,
+    setIsDelivery,
+    deliveryProfile,
+    setDeliveryProfile,
     showUserLogin,
     SetShowUserLogin,
     products,
@@ -197,6 +245,9 @@ export const AppContextProvider = ({ children }) => {
     getCartCount,
     axios,
     fetchProducts,
+    fetchDelivery,
+    fetchDeliveryList,
+    createDeliveryByAdmin,
     SetCartItems,
   };
 
