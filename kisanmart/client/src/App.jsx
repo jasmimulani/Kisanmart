@@ -31,7 +31,7 @@ import DeliveryClaim from './Pages/Delivery/Claim'
 import DeliveryProfile from './Pages/Delivery/Profile'
 import DeliveryList from './Pages/Seller/DeliveryList'
 import CreateDelivery from './Pages/Seller/CreateDelivery'
-
+import Dashboard from './Pages/Delivery/Dashboard';
 const App = () => {
   const isSellerPath = useLocation().pathname.includes("seller")
   const { showUserLogin, isSeller, isDelivery } = useAppContext()
@@ -93,16 +93,22 @@ const App = () => {
             <Route path="orders" element={<Orders />} />
           </Route>
 
-          {/* Delivery Routes */}
-          <Route path="/delivery" element={<Navigate to="/delivery/login" />} />
-          <Route path="/delivery/register" element={<DeliveryRegister />} />
-          <Route path="/delivery/login" element={<DeliveryLogin />} />
-          <Route path="/delivery/claim" element={<DeliveryClaim />} />
-          <Route path="/delivery/dashboard" element={isDelivery ? <DeliveryLayout /> : <Navigate to="/delivery/login" />}>
-            <Route index element={<DeliveryProfile />} />
-            <Route path="orders" element={<DeliveryOrders />} />
-          </Route>
-        </Routes>
+         // In App.jsx, update the delivery routes
+<Route path="/delivery" element={<Navigate to="/delivery/dashboard" replace />} />
+  <Route path="/delivery/register" element={<DeliveryRegister />} />
+  <Route path="/delivery/login" element={<DeliveryLogin />} />
+  <Route path="/delivery/claim" element={<DeliveryClaim />} />
+  <Route 
+    path="/delivery" 
+    element={isDelivery ? <DeliveryLayout /> : <Navigate to="/delivery/login" replace />}
+  >
+    <Route index element={<Dashboard />} />
+    <Route path="dashboard" element={<Dashboard />} />
+    <Route path="orders" element={<DeliveryOrders />} />
+    <Route path="profile" element={<DeliveryProfile />} />
+  </Route>
+</Routes>
+        
       </div>
 
       {!isSellerPath && <Fotter />}

@@ -108,25 +108,49 @@ export const categories = [
     id: 1,
     name: 'Farming Tools',
     image: 'https://images.unsplash.com/photo-1580996876223-3cbd878a5a38?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80',
-    path: '/category/farming-tools'
+    path: 'Agriculture Tools'
   },
   {
     id: 2,
     name: 'Irrigation Systems',
     image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80',
-    path: '/category/irrigation'
+    path: 'Rubber Plantation'
   },
   {
     id: 3,
     name: 'Greenhouse Supplies',
     image: 'https://images.unsplash.com/photo-1605000797499-95a51c5269ae?ixlib=rb-4.0.3&auto=format&fit=crop&w=1171&q=80',
-    path: '/category/greenhouse'
+    path: 'Accessories'
   },
   {
     id: 4,
     name: 'Livestock Equipment',
     image: 'https://images.unsplash.com/photo-1551649001-7a2482d98d2f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1169&q=80',
-    path: '/category/livestock'
+    path: 'Beekeeper Accessories'
+  },
+  {
+    id: 5,
+    name: 'Livestock Equipment',
+    image: 'https://images.unsplash.com/photo-1551649001-7a2482d98d2f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1169&q=80',
+    path: 'Organic Fertilizer'
+  },
+  {
+    id: 6,
+    name: 'Livestock Equipment',
+    image: 'https://images.unsplash.com/photo-1551649001-7a2482d98d2f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1169&q=80',
+    path: 'Vegetable Seeds'
+  },
+  {
+    id: 7,
+    name: 'Livestock Equipment',
+    image: 'https://images.unsplash.com/photo-1551649001-7a2482d98d2f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1169&q=80',
+    path: 'Flower Seeds'
+  },
+  {
+    id: 8,
+    name: 'Livestock Equipment',
+    image: 'https://images.unsplash.com/photo-1551649001-7a2482d98d2f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1169&q=80',
+    path: 'Fruit Seeds'
   }
 ];
 export const footerLinks = [

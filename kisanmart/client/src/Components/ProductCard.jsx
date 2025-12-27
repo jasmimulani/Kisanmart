@@ -1,48 +1,94 @@
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAppContext } from '../Context/AppContext'
+import React from "react";
+import { useAppContext } from "../Context/AppContext";
+import { Link } from "react-router-dom";
 
 const ProductCard = ({ product }) => {
-  const { addToCart, currency, cartItems, updateCartItem, removeFromeCart } = useAppContext()
-  const navigate = useNavigate()
+  const { cartItems, addToCart, increaseQty, decreaseQty } = useAppContext();
+  const qty = cartItems?.[product._id] || 0;
 
-  if (!product) return null
-
-  const imageSrc = Array.isArray(product.image) ? product.image[0] : product.image
-  const price = product.offerprice ?? product.price ?? 0
-  const qty = (cartItems && cartItems[product._id]) ? cartItems[product._id] : 0
-
-  const handleAdd = (e) => { e.stopPropagation(); addToCart(product._id) }
-  const handleIncrease = (e) => { e.stopPropagation(); updateCartItem(product._id, qty + 1) }
-  const handleDecrease = (e) => { e.stopPropagation(); if (qty > 1) updateCartItem(product._id, qty - 1); else removeFromeCart(product._id) }
+  // Format price with Indian Rupee symbol
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(price).replace('₹', '₹ ');
+  };
 
   return (
-    <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-100">
-      <div className="relative h-48 bg-gray-100 cursor-pointer" onClick={() => navigate(`/products/${product.category?.toLowerCase()}/${product._id}`)}>
-        <img src={imageSrc} alt={product.name} className="w-full h-full object-cover" />
-        {product.isNew && <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">New</span>}
+    <div className="group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 h-full flex flex-col">
+      {/* Product Image with Badge */}
+      <div className="relative overflow-hidden">
+        <Link to={`/product/${product._id}`} className="block">
+          <img
+            src={product.image || 'https://via.placeholder.com/300x300?text=No+Image'}
+            alt={product.name}
+            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = 'https://via.placeholder.com/300x300?text=No+Image';
+            }}
+          />
+        </Link>
+        {product.category && (
+          <div className="absolute top-2 left-2 bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-full">
+            {product.category}
+          </div>
+        )}
       </div>
-      <div className="p-4">
-        <h3 className="font-semibold text-gray-800 mb-1 cursor-pointer" onClick={(e)=>{e.stopPropagation(); navigate(`/products/${product.category?.toLowerCase()}/${product._id}`)}}>
-          {product.name}
-        </h3>
-        <p className="text-sm text-gray-500 mb-2">{product.category}</p>
-        <div className="flex justify-between items-center">
-          <span className="font-bold text-green-700">{currency}{price}</span>
-          {qty > 0 ? (
-            <div className="flex items-center border rounded-md overflow-hidden">
-              <button onClick={handleDecrease} aria-label="Decrease quantity" className="px-3 py-1 bg-gray-100 hover:bg-gray-200">−</button>
-              <span className="px-3 py-1 min-w-[40px] text-center">{qty}</span>
-              <button onClick={handleIncrease} aria-label="Increase quantity" className="px-3 py-1 bg-gray-100 hover:bg-gray-200">+</button>
-            </div>
+
+      {/* Product Info */}
+      <div className="p-4 flex-1 flex flex-col">
+        <div className="mb-2">
+          <Link to={`/product/${product._id}`} className="hover:text-green-600 transition-colors">
+            <h3 className="font-medium text-gray-900 line-clamp-2 h-12">
+              {product.name}
+            </h3>
+          </Link>
+          
+          {/* Price */}
+          <div className="mt-2">
+            <span className="text-lg font-bold text-green-700">
+              {formatPrice(product.offerprice || product.price)}
+            </span>
+            {product.offerprice && product.offerprice < product.price && (
+              <span className="ml-2 text-sm text-gray-500 line-through">
+                {formatPrice(product.price)}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Add to Cart / Quantity Controls */}
+        <div className="mt-auto pt-2">
+          {qty === 0 ? (
+            <button
+              onClick={() => addToCart(product._id)}
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg transition-colors"
+            >
+              Add to Cart
+            </button>
           ) : (
-            <button onClick={handleAdd} className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">Add</button>
+            <div className="flex items-center justify-between border border-gray-200 rounded-lg p-1">
+              <button
+                onClick={() => decreaseQty(product._id)}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+              >
+                <span className="text-xl">−</span>
+              </button>
+              <span className="font-medium">{qty}</span>
+              <button
+                onClick={() => increaseQty(product._id)}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+              >
+                <span className="text-xl">+</span>
+              </button>
+            </div>
           )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ProductCard
-
+export default ProductCard;

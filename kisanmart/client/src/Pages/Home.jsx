@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import Categoris from '../Components/Categoris'
+// import Categoris from '../Components/Categoris'
 import BestSeller from '../Components/BestSeller'
 import ProductGrid from '../Components/ProductGrid'
 import Services from '../Components/Services'
@@ -47,7 +47,7 @@ const Home = () => {
       </section>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <section aria-label="Product categories" className="mt-16">
-          <Categoris />
+          {/* <Categoris /> */}
           <ProductGrid />
         </section>
         <hr className="mt-12 border-gray-200/60" />

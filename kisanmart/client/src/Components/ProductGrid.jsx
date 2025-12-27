@@ -1,25 +1,29 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { useAppContext } from '../Context/AppContext'
-import ProductCard from './ProductCard'
+import React from "react";
+import { Link } from "react-router-dom";
+import { useAppContext } from "../Context/AppContext";
+import ProductCard from "./ProductCard";
 
 const ProductGrid = ({ limit = 8 }) => {
-  const { products } = useAppContext()
+  const { products } = useAppContext();
 
-  
-  if (!Array.isArray(products)) return null
+  // Safety check
+  if (!Array.isArray(products)) return null;
 
+  // Filter valid products & limit
   const items = products
     .filter((p) => p && (p._id || p.id))
-    .slice(0, limit)
+    .slice(0, limit);
 
-  if (items.length === 0) return null
+  if (items.length === 0) return null;
 
   return (
     <section className="mt-12">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold">Popular Products</h2>
-        <Link to="/products" className="text-primary font-medium">
+        <Link
+          to="/products"
+          className="text-green-600 font-medium hover:underline"
+        >
           View all
         </Link>
       </div>
@@ -33,7 +37,9 @@ const ProductGrid = ({ limit = 8 }) => {
         ))}
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default ProductGrid
+export default ProductGrid;
+
+

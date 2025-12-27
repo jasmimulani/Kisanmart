@@ -10,189 +10,149 @@ export const AppContext = createContext();
 
 export const AppContextProvider = ({ children }) => {
   const currency = import.meta.env.VITE_CURRENCY;
-
   const navigate = useNavigate();
+
   const [user, setUser] = useState(null);
   const [isSeller, setIsSeller] = useState(false);
   const [sellerProfile, setSellerProfile] = useState(null);
 
-  // Delivery boy auth state
   const [isDelivery, setIsDelivery] = useState(false);
   const [deliveryProfile, setDeliveryProfile] = useState(null);
+
   const [showUserLogin, SetShowUserLogin] = useState(false);
   const [products, SetProducts] = useState([]);
-
   const [cartItems, SetCartItems] = useState({});
-  // store an item id attempted to add when user is not logged in
   const [pendingAdd, setPendingAdd] = useState(null);
-  const [searchQuery, SetSearchQuery] = useState({});
+  const [searchQuery, SetSearchQuery] = useState("");
 
-  //  fetch seller satus
+  /* ---------------- AUTH ---------------- */
+
+  const fetchUser = async () => {
+    try {
+      const { data } = await axios.get("/api/user/is-auth");
+      if (data.success) {
+        setUser(data.user);
+        SetCartItems(data.user.cartItems || {});
+      }
+    } catch {
+      setUser(null);
+      SetCartItems({});
+    }
+  };
+
   const fetchSeller = async () => {
     try {
       const { data } = await axios.get("/api/seller/is-auth");
-      if (data.success) {
-        setIsSeller(true);
-        setSellerProfile(data.profile || null);
-      } else {
-        setIsSeller(false);
-        setSellerProfile(null);
-      }
-    } catch (error) {
+      setIsSeller(data.success);
+      setSellerProfile(data.profile || null);
+    } catch {
       setIsSeller(false);
       setSellerProfile(null);
     }
   };
 
-  // fetch delivery-boy auth status
   const fetchDelivery = async () => {
     try {
-      const { data } = await axios.get('/api/delivery/is-auth')
-      if (data.success) {
-        setIsDelivery(true)
-        setDeliveryProfile(data.profile || null)
-      } else {
-        setIsDelivery(false)
-        setDeliveryProfile(null)
-      }
-    } catch (error) {
-      setIsDelivery(false)
-      setDeliveryProfile(null)
-    }
-  }
-
-  // admin: fetch delivery-boys list
-  const fetchDeliveryList = async () => {
-    try {
-      const { data } = await axios.get('/api/delivery/list')
-      if (data.success) return data.list
-      throw new Error(data.message || 'Unable to fetch')
-    } catch (error) {
-      throw error
-    }
-  }
-
-  // admin: create delivery boy (returns temp password and token)
-  const createDeliveryByAdmin = async (payload) => {
-    try {
-      const { data } = await axios.post('/api/delivery/create', payload)
-      if (data.success) return data
-      throw new Error(data.message || 'Unable to create')
-    } catch (error) {
-      throw error
-    }
-  }
-
-  //  fetch user auth status , user data and cart item
-
-  const fetchUser = async () => {
-    try {
-      const { data } = await axios.get("/api/user/is-auth");
-      if (data.success) setUser(data.user);
-      SetCartItems(data.user.cartItems);
-    } catch (error) {
-      setUser(null);
+      const { data } = await axios.get("/api/delivery/is-auth");
+      setIsDelivery(data.success);
+      setDeliveryProfile(data.profile || null);
+    } catch {
+      setIsDelivery(false);
+      setDeliveryProfile(null);
     }
   };
 
-  // fetch product
+  /* ---------------- PRODUCTS ---------------- */
 
   const fetchProducts = async () => {
     try {
       const { data } = await axios.get("/api/product/list");
-
-      if (data.success) {
-        SetProducts(data.products);
-      } else {
-        toast.error(data.message);
-      }
+      if (data.success) SetProducts(data.products || []);
+      else toast.error(data.message);
     } catch (error) {
       toast.error(error.message);
     }
   };
 
-  // add product in cart
+  /* ---------------- CART LOGIC ---------------- */
 
-  const addToCart = (itemId) => {
-    // require authentication to add to cart
+  const addToCart = (productId) => {
     if (!user) {
-      // open login modal and remember pending add
-      setPendingAdd(itemId);
+      setPendingAdd(productId);
       SetShowUserLogin(true);
-      toast.error("Please login or register to add items to cart.");
+      toast.error("Please login to add product");
       return;
     }
 
-    let cartData = structuredClone(cartItems);
-
-    if (cartData[itemId]) {
-      cartData[itemId] += 1;
-    } else {
-      cartData[itemId] = 1;
-    }
-    SetCartItems(cartData);
-    toast.success("Added To Cart.");
+    SetCartItems((prev) => ({
+      ...prev,
+      [productId]: (prev[productId] || 0) + 1,
+    }));
   };
 
-  // if user logs in and there was a pending add, perform it automatically
-  useEffect(() => {
-    if (user && pendingAdd) {
-      const itemId = pendingAdd;
-      setPendingAdd(null);
-      let cartData = structuredClone(cartItems || {});
-      if (cartData[itemId]) {
-        cartData[itemId] += 1;
-      } else {
-        cartData[itemId] = 1;
-      }
-      SetCartItems(cartData);
-      toast.success("Added To Cart.");
-    }
-  }, [user]);
-
-  // update cart item
-  const updateCartItem = (itemId, quantity) => {
-    let cartData = structuredClone(cartItems);
-    cartData[itemId] = quantity;
-    SetCartItems(cartData);
-    toast.success("Cart updated");
+  const increaseQty = (productId) => {
+    SetCartItems((prev) => ({
+      ...prev,
+      [productId]: prev[productId] + 1,
+    }));
   };
 
-  // remove product into cart
-
-  const removeFromeCart = (itemId) => {
-    let cartData = structuredClone(cartItems);
-    if (cartData[itemId]) {
-      cartData[itemId] -= 1;
-      if (cartData[itemId] === 0) {
-        delete cartData[itemId];
-      }
-    }
-    toast.success("Remove from Cart.");
-    SetCartItems(cartData);
+  const decreaseQty = (productId) => {
+    SetCartItems((prev) => {
+      const updated = { ...prev };
+      updated[productId] -= 1;
+      if (updated[productId] <= 0) delete updated[productId];
+      return updated;
+    });
   };
 
-  //  get cart item
+  const removeFromCart = (productId) => {
+    SetCartItems((prev) => {
+      const updated = { ...prev };
+      delete updated[productId];
+      return updated;
+    });
+    toast.success("Removed from cart");
+  };
 
   const getCartCount = () => {
-    // Return number of distinct product IDs in cartItems (not sum of quantities)
-    if (!cartItems) return 0;
-    return Object.keys(cartItems).length;
+    return Object.values(cartItems).reduce((a, b) => a + b, 0);
   };
-
-  //   get cart total
 
   const getCartAmount = () => {
     let total = 0;
     for (let id in cartItems) {
-      const product = products.find((p) => p._id === id);
+      const product = products.find((p) => p?._id === id);
       if (product) {
         total += product.offerprice * cartItems[id];
       }
     }
-    // console.log("cartItems", cartItems);
     return total;
   };
+
+  /* ---------------- AUTO ADD AFTER LOGIN ---------------- */
+
+  useEffect(() => {
+    if (user && pendingAdd) {
+      addToCart(pendingAdd);
+      setPendingAdd(null);
+    }
+  }, [user]);
+
+  /* ---------------- SYNC CART TO DB ---------------- */
+
+  useEffect(() => {
+    const syncCart = async () => {
+      try {
+        await axios.post("/api/cart/update", { cartItems });
+      } catch (error) {
+        toast.error("Cart sync failed");
+      }
+    };
+    if (user) syncCart();
+  }, [cartItems]);
+
+  /* ---------------- INIT ---------------- */
 
   useEffect(() => {
     fetchUser();
@@ -201,32 +161,37 @@ export const AppContextProvider = ({ children }) => {
     fetchProducts();
   }, []);
 
-  //  update databse cart items
-
-  useEffect(() => {
-    const updateCart = async () => {
-      try {
-        const { data } = await axios.post("/api/cart/update", { cartItems });
-        if (!data.success) {
-          toast.error(data.message);
-        }
-      } catch (error) {
-        toast.error(error.message);
+  const createDeliveryByAdmin = async (payload) => {
+    try {
+      console.log('Sending delivery creation request with payload:', payload);
+      const { data } = await axios.post('/api/delivery/create', payload, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true
+      });
+      console.log('Delivery creation response:', data);
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to create delivery');
       }
-    };
-    if (user) {
-      updateCart();
+      return data;
+    } catch (error) {
+      console.error('Delivery creation error:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
+      throw new Error(error.response?.data?.message || error.message || 'Failed to create delivery. Please check your admin privileges and try again.');
     }
-  }, [cartItems]);
+  };
 
   const value = {
     navigate,
     user,
     setUser,
-    setIsSeller,
     isSeller,
+    setIsSeller,
     sellerProfile,
-    setSellerProfile,
     isDelivery,
     setIsDelivery,
     deliveryProfile,
@@ -235,25 +200,28 @@ export const AppContextProvider = ({ children }) => {
     SetShowUserLogin,
     products,
     currency,
+
     addToCart,
-    updateCartItem,
-    removeFromeCart,
+    increaseQty,
+    decreaseQty,
+    removeFromCart,
+
     cartItems,
+    getCartCount,
+    getCartAmount,
+
     searchQuery,
     SetSearchQuery,
-    getCartAmount,
-    getCartCount,
+
     axios,
     fetchProducts,
-    fetchDelivery,
-    fetchDeliveryList,
-    createDeliveryByAdmin,
     SetCartItems,
+    createDeliveryByAdmin,
   };
 
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={value}>{children}</AppContext.Provider>
+  );
 };
 
-export const useAppContext = () => {
-  return useContext(AppContext);
-};
+export const useAppContext = () => useContext(AppContext);
