@@ -47,18 +47,18 @@ const testEmail = async () => {
   console.log("📧 Sending test email...");
   try {
     const info = await transporter.sendMail({
-      from: `"QuickMart Test" <${emailFrom || emailUser}>`,
+      from: `"KisanMart Test" <${emailFrom || emailUser}>`,
       to: emailUser,
-      subject: "QuickMart Email Test - Setup Successful",
+      subject: "KisanMart Email Test - Setup Successful",
       html: `
         <h2>✓ Email Setup Successful!</h2>
-        <p>Your QuickMart email system is configured correctly.</p>
+        <p>Your KisanMart email system is configured correctly.</p>
         <p>Order confirmation emails will be sent automatically when:</p>
         <ul>
           <li>A customer places a COD order</li>
-          <li>A Stripe payment is successfully completed</li>
+          <li>A payment is successfully completed</li>
         </ul>
-        <p><b>– Team QuickMart</b></p>
+        <p><b>– Team KisanMart</b></p>
       `,
     });
 

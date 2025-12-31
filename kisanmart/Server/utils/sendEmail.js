@@ -19,7 +19,7 @@ const sendEmail = async (to, subject, htmlMessage) => {
     const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER || "YOUR_GMAIL_HERE";
 
     await transporter.sendMail({
-      from: `"QuickMart" <${fromAddress}>`,
+      from: `"KisanMart" <${fromAddress}>`,
       to,
       subject,
       html: htmlMessage,

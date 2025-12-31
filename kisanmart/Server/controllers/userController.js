@@ -36,8 +36,31 @@ export const register = async (req, res) => {
 
     await sendEmail(
       user.email,
-      "Welcome to QuickMart",
-      `<h2>Hello ${user.name}</h2><p>Thank you for registering on QuickMart!</p>`
+      `Welcome to KisanMart, ${user.name}!`,
+      `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px;">
+        <div style="background-color: #1a73e8; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+          <h1>Welcome to KisanMart!</h1>
+        </div>
+        <div style="background: white; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 8px 8px;">
+          <h2>Hello ${user.name},</h2>
+          <p>Thank you for registering with KisanMart - your trusted farming partner!</p>
+          <p>We're excited to help you find the best agricultural products and services.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="https://kisanmart.com/dashboard" 
+               style="background-color: #1a73e8; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+              Start Shopping
+            </a>
+          </div>
+          <p>If you have any questions, feel free to reach out to our support team.</p>
+          <p><strong>Happy Farming!</strong></p>
+          <p><b>– Team KisanMart</b></p>
+        </div>
+        <div style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
+          <p>This is an automated message, please do not reply directly to this email.</p>
+        </div>
+      </div>
+      `
     );
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {

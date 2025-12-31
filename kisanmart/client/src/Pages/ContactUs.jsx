@@ -32,7 +32,7 @@ const ContactUs = () => {
     try {
       const { data } = await axios.post("/api/contact/contact", { name, email,contact, message  });
       if (data.success) {
-        toast.success("Thanks for contacting QuickMart!");
+        toast.success("Thanks for contacting KisanMart! We'll get back to you soon.");
         setFormData({ name: "", email: "", message: "" , contact: "" });
       } else {
         toast.error(data.message || "Something went wrong. Try again later.");
@@ -46,7 +46,7 @@ const ContactUs = () => {
   };
 
   return (
-    <main style={{ fontFamily: "Arial, sans-serif", background: "#f9fbfc" }} aria-label="Contact QuickMart">
+    <main style={{ fontFamily: "Arial, sans-serif", background: "#f9fbfc" }} aria-label="Contact KisanMart">
       {/* Hero Section */}
       <section
         style={{
@@ -57,7 +57,7 @@ const ContactUs = () => {
         }}
         aria-label="Contact Hero"
       >
-        <h1 style={{ fontSize: "48px", marginBottom: "10px" }}>Contact QuickMart</h1>
+        <h1 style={{ fontSize: "48px", marginBottom: "10px" }}>Contact KisanMart</h1>
         <p style={{ fontSize: "18px", maxWidth: "700px", margin: "0 auto" }}>
           Have a question, feedback, or need help? We’re here to assist you.
         </p>
@@ -158,7 +158,7 @@ const ContactUs = () => {
             <ContactCard
               icon={<FaMapMarkerAlt size={22} color="#e67e22" />}
               title="Address"
-              value={<span style={{ color: "#636e72" }}>123 QuickMart Street, Mumbai, India</span>}
+              value={<span style={{ color: "#636e72" }}>KisanMart Headquarters<br/>Mumbai, Maharashtra, India</span>}
             />
           </div>
         </div>

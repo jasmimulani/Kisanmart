@@ -116,7 +116,8 @@ export const AppContextProvider = ({ children }) => {
   };
 
   const getCartCount = () => {
-    return Object.values(cartItems).reduce((a, b) => a + b, 0);
+    // Return the number of unique products in the cart
+    return Object.keys(cartItems).length;
   };
 
   const getCartAmount = () => {
