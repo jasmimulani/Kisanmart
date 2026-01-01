@@ -11,7 +11,7 @@ const Home = () => {
   return (
     <main aria-label="Homepage">
       <section className="relative w-screen h-[450px] sm:h-[550px] lg:h-[600px] 
-                          left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
+                         left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
 
         {/* Background Image */}
         <img
