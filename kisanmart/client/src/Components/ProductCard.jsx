@@ -87,7 +87,7 @@ const ProductCard = ({ product }) => {
                 onClick={() => decreaseQty(product._id)}
                 className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-lg"
               >
-                −
+                -
               </button>
               <span className="font-semibold">{qty}</span>
               <button
