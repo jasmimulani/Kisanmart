@@ -7,7 +7,9 @@ const MyOrder = () => {
 
   const fetchMyOrders = async () => {
     try {
-      const { data } = await axios.get(`/api/order/user?userId=${user._id}`);
+      const { data } = await axios.get(
+        `/api/order/user?userId=${user._id}`
+      );
       if (data.success) {
         setMyOrders(data.orders);
       }
@@ -17,78 +19,112 @@ const MyOrder = () => {
   };
 
   useEffect(() => {
-    if (user) {
+    if (user?._id) {
       fetchMyOrders();
     }
   }, [user]);
 
   return (
-    <div className="my-16 pb-16">
-      <div className="flex flex-col items-end w-max mb-8">
-        <p className="text-2xl font-medium uppercase">My Orders</p>
-        <div className="w-16 h-0.5 bg-primary rounded-full"></div>
+    <div className="my-16 pb-16 max-w-5xl mx-auto px-4">
+      {/* TITLE */}
+      <div className="mb-8">
+        <p className="text-2xl font-semibold uppercase">
+          My Orders
+        </p>
+        <div className="w-16 h-0.5 bg-primary mt-1 rounded-full"></div>
       </div>
 
-      {myOrders.map((order, index) => (
-        <div
-          key={index}
-          className="border border-gray-300 rounded-lg mb-10 p-4 py-5 max-w-4xl"
-        >
-          <p className="flex justify-between md:items-center text-gray-400 md:font-medium flex-wrap gap-2">
-            <span>Order ID: {order._id}</span>
-            <span>Payment: {order.paymentType}</span>
-            <span>
-              Total Amount: {currency} {order.amount}
-            </span>
-            <span>
-              Date:{" "}
-              {new Date(order.createdAt).toLocaleDateString()}{" "}
-              {new Date(order.createdAt).toLocaleTimeString()}
-            </span>
-          </p>
+      {/* NO ORDERS */}
+      {myOrders.length === 0 && (
+        <p className="text-center text-gray-500 text-lg">
+          No orders yet.
+        </p>
+      )}
 
-          {order.items.map((item, idx) => (
-            <div
-              key={idx}
-              className={`relative bg-white text-gray-500/70 ${
-                order.items.length !== idx + 1 && "border-b"
-              } border-gray-300 flex flex-col md:flex-row md:items-center justify-between p-4 py-5 md:gap-16 w-full max-w-4xl`}
-            >
-              <div className="flex items-center mb-4 md:mb-0">
-                <div className="bg-primary/10 p-4 rounded-lg">
-                  <img
-                    src={item.product?.image?.[0]}
-                    alt={item.product?.name || "Product"}
-                    className="w-16 h-16 object-cover"
-                  />
+      {/* ORDERS */}
+      {myOrders.map((order) => {
+        // 🔹 Calculate TOTAL ONLY from items
+        const totalAmount = order.items.reduce((sum, item) => {
+          const price =
+            item.product?.offerprice ??
+            item.product?.price ??
+            0;
+          return sum + price * item.quantity;
+        }, 0);
+
+        return (
+          <div
+            key={order._id}
+            className="border border-gray-300 rounded-lg mb-10 p-4"
+          >
+            {/* ORDER HEADER */}
+            <div className="flex flex-wrap gap-3 justify-between text-sm text-gray-500 mb-4">
+              <span>
+                <b>Order ID:</b> {order._id}
+              </span>
+              <span>
+                <b>Payment:</b> {order.paymentType}
+              </span>
+              <span>
+                <b>Date:</b>{" "}
+                {new Date(order.createdAt).toLocaleString()}
+              </span>
+            </div>
+
+            {/* ITEMS */}
+            {order.items.map((item) => {
+              const price =
+                item.product?.offerprice ??
+                item.product?.price ??
+                0;
+
+              return (
+                <div
+                  key={item._id}
+                  className="flex flex-col md:flex-row items-center justify-between border-t pt-4 gap-6"
+                >
+                  {/* PRODUCT INFO */}
+                  <div className="flex items-center gap-4">
+                    <div className="bg-primary/10 p-3 rounded-lg">
+                      <img
+                        src={item.product?.image?.[0]}
+                        alt={item.product?.name}
+                        className="w-16 h-16 object-cover"
+                      />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-medium text-gray-800">
+                        {item.product?.name}
+                      </h2>
+                      <p className="text-sm text-gray-500">
+                        Category: {item.product?.category}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* QTY & STATUS */}
+                  <div className="text-sm text-gray-600">
+                    <p>Quantity: {item.quantity}</p>
+                    <p>Status: {order.status || "Placed"}</p>
+                  </div>
+
+                  {/* ITEM TOTAL */}
+                  <p className="text-primary text-lg font-semibold">
+                    {currency} {price * item.quantity}
+                  </p>
                 </div>
-                <div className="ml-4">
-                  <h2 className="text-xl font-medium text-gray-800">
-                    {item.product?.name}
-                  </h2>
-                  <p>Category: {item.product?.category}</p>
-                </div>
-              </div>
+              );
+            })}
 
-              <div className="flex flex-col justify-center md:ml-8 mb-4 md:mb-0">
-                <p>Quantity: {item.quantity || 1}</p>
-                <p>Status: {order.status || "Processing"}</p>
-              </div>
-
-              <p className="text-primary text-lg font-medium">
-                Amount: {currency}{" "}
-                {item.product?.offerprice
-                  ? item.product.offerprice * item.quantity
-                  : "N/A"}
+            {/* FINAL TOTAL */}
+            <div className="flex justify-end mt-6 border-t pt-4">
+              <p className="text-lg font-semibold text-primary">
+                Total Amount: {currency} {totalAmount}
               </p>
             </div>
-          ))}
-        </div>
-      ))}
-
-      {myOrders.length === 0 && (
-        <p className="text-center text-gray-500 text-lg">No orders yet.</p>
-      )}
+          </div>
+        );
+      })}
     </div>
   );
 };
