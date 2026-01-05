@@ -182,7 +182,7 @@ const Cart = () => {
       </div>
 
       {/* ---------------- ORDER SUMMARY ---------------- */}
-      <div className="max-w-[360px] w-full bg-gray-100 p-5 border ml-8">
+      <div className="max-w-[360px] w-full  p-5 border ml-8">
         <h2 className="text-xl font-medium">Order Summary</h2>
         <hr className="my-4" />
 
