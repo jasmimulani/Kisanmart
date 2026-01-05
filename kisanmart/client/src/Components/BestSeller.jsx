@@ -1,4 +1,7 @@
 import React from "react";
+import { Link } from "react-router-dom";
+
+
 
 const BestSeller = () => {
   return (
@@ -34,9 +37,11 @@ const BestSeller = () => {
               for everyone!
             </p>
 
-            <button className="mt-6 px-6 py-2 bg-green-600 hover:bg-green-700 rounded-full text-sm font-semibold transition">
-              SHOP NOW
-            </button>
+  <Link to="/products">
+              <button className="mt-6 px-6 py-2 bg-green-600 hover:bg-green-700 rounded-full text-sm font-semibold transition">
+                SHOP NOW
+              </button>
+  </Link>
           </div>
         </div>
       </div>

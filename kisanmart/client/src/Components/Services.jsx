@@ -23,7 +23,6 @@ const Services = () => {
                 {/* ICON */}
                 <div className="flex items-center justify-center w-12 h-12 rounded-full bg-green-100 text-green-700 font-bold text-xl transition-transform duration-300 group-hover:scale-110">
                   
-                  {/* ✅ 3rd card = Rupees icon */}
                   {idx === 2 ? (
                     "₹"
                   ) : (
