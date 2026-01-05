@@ -16,7 +16,7 @@ const Dashboard = () => {
   const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Fetch orders (same API as Orders page)
+  //  Fetch orders (same API as Orders page)
   const fetchOrders = async () => {
     try {
       setLoading(true);
@@ -93,8 +93,7 @@ const Dashboard = () => {
         <StatCard title="Completed" value={stats.completed} icon={<FiCheckCircle />} />
         <StatCard
           title="Earnings"
-          value={`${currency}${stats.totalEarnings}`}
-          icon={<FiDollarSign />}
+          value={`${currency}${stats.totalEarnings}`}      
         />
       </div>
 

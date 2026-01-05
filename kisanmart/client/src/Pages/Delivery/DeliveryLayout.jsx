@@ -18,8 +18,8 @@ const DeliveryLayout = () => {
   const navItems = [
     { icon: <FiHome className="w-5 h-5" />, label: 'Dashboard', to: '/delivery/dashboard' },
     { icon: <FiPackage className="w-5 h-5" />, label: 'New Orders', to: '/delivery/orders' },
-    { icon: <FiTruck className="w-5 h-5" />, label: 'In Progress', to: '/delivery/in-progress' },
-    { icon: <FiCheckCircle className="w-5 h-5" />, label: 'Completed', to: '/delivery/completed' },
+    // { icon: <FiTruck className="w-5 h-5" />, label: 'In Progress', to: '/delivery/in-progress' },
+    // { icon: <FiCheckCircle className="w-5 h-5" />, label: 'Completed', to: '/delivery/completed' },
     { icon: <FiUser className="w-5 h-5" />, label: 'Profile', to: '/delivery/profile' },
   ];
 
