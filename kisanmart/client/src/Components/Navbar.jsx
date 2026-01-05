@@ -47,11 +47,11 @@ const Navbar = () => {
             <div className="w-full max-w-2xl flex bg-white rounded-full overflow-hidden">
               <input
                 type="search"
-                placeholder="Search products..."
+                placeholder="Search Products..."
                 onChange={(e) => SetSearchQuery(e.target.value)}
                 className="flex-1 px-4 py-3 outline-none text-sm"
               />
-              <button className="px-4 bg-green-600">
+              <button className="px-4 bg-gray-200">
                 <img src={assets.search_icon} className="w-4 invert" />
               </button>
             </div>
