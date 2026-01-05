@@ -47,7 +47,6 @@ const CreateDelivery = () => {
             required
           />
         </div>
-
         <div>
           <label className="block mb-1 font-medium text-gray-700">Email</label>
           <input
