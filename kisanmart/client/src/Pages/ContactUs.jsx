@@ -2,225 +2,266 @@ import React, { useState } from "react";
 import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
 import { useAppContext } from "../Context/AppContext";
 import toast from "react-hot-toast";
-import Contact from "../../../Server/models/Contact";
 
 const ContactUs = () => {
   const { axios } = useAppContext();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     contact: "",
     message: "",
   });
+
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { name, email,contact, message } = formData;
 
-    if (!name.trim() || !email.trim() || !contact.trim()||!message.trim()) {
-      toast.error("Please fill in all fields");
+    if (Object.values(formData).some((v) => !v.trim())) {
+      toast.error("Please complete all required fields.");
       return;
     }
 
     setLoading(true);
     try {
-      const { data } = await axios.post("/api/contact/contact", { name, email,contact, message  });
+      const { data } = await axios.post("/api/contact/contact", formData);
       if (data.success) {
-        toast.success("Thanks for contacting KisanMart! We'll get back to you soon.");
-        setFormData({ name: "", email: "", message: "" , contact: "" });
+        toast.success("Your request has been received successfully.");
+        setFormData({
+          name: "",
+          email: "",
+          contact: "",
+          message: "",
+        });
       } else {
-        toast.error(data.message || "Something went wrong. Try again later.");
+        toast.error("Submission failed. Please try again.");
       }
-    } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.message || "Something went wrong. Try again later.");
+    } catch (error) {
+      toast.error("Server error. Please try again later.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main style={{ fontFamily: "Arial, sans-serif", background: "#f9fbfc" }} aria-label="Contact KisanMart">
-      {/* Hero Section */}
-      <section
-        style={{
-          background: "url('https://img.freepik.com/free-photo/contact-us-customer-support-hotline-people-connect-call-customer-support_36325-164.jpg') center/cover no-repeat",
-          color: "#fff",
-          textAlign: "center",
-          padding: "100px 20px",
-        }}
-        aria-label="Contact Hero"
-      >
-        <h1 style={{ fontSize: "48px", marginBottom: "10px" }}>Contact KisanMart</h1>
-        <p style={{ fontSize: "18px", maxWidth: "700px", margin: "0 auto" }}>
-          Have a question, feedback, or need help? We’re here to assist you.
-        </p>
-      </section>
+    <div style={page}>
+      <div style={container}>
+        {/* LEFT PANEL */}
+        <aside style={leftPanel}>
+          <h2 style={brand}>KisanMart</h2>
+          <p style={tagline}>
+            A digital agriculture marketplace providing quality seeds,
+            fertilizers, tools, and farming solutions.
+          </p>
 
-      {/* Main Content */}
-      <section style={{ maxWidth: "1100px", margin: "60px auto", padding: "0 20px" }} aria-label="Contact Form and Info">
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "40px", justifyContent: "space-between" }}>
-          {/* Contact Form */}
-          <form
-            onSubmit={handleSubmit}
-            style={{
-              flex: "1 1 500px",
-              backgroundColor: "#fff",
-              padding: "40px",
-              borderRadius: "12px",
-              boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
-            }}
-            aria-label="Send us a message"
-          >
-            <h2 style={{ color: "#2E7D32", marginBottom: "20px" }}>📩 Send us a Message</h2>
+          <div style={infoBlock}>
+            <InfoRow icon={<FaPhoneAlt />} text="+91 98765 43210" />
+            <InfoRow icon={<FaEnvelope />} text="support@kisanmart.com" />
+            <InfoRow
+              icon={<FaMapMarkerAlt />}
+              text="Mumbai, Maharashtra, India"
+            />
+          </div>
 
-            <FormField
-              label="Name"
-              type="text"
+          <div style={businessBox}>
+            <strong>Business Hours</strong>
+            <p>
+              Monday – Saturday
+              <br />
+              9:00 AM – 6:00 PM
+            </p>
+          </div>
+        </aside>
+
+        {/* RIGHT PANEL */}
+        <section style={rightPanel}>
+          <h3 style={formTitle}>Contact Support</h3>
+          <p style={formDesc}>
+            Submit your inquiry and our support team will respond within one
+            business day.
+          </p>
+
+          <form onSubmit={handleSubmit} style={form}>
+            <InputField
+              label="Full Name"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Your full name"
-              required
             />
-            <FormField
-              label="Email"
-              type="email"
+
+            <InputField
+              label="Email Address"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="your@email.com"
-              required
             />
 
-             <FormField
-              label="contact"
-              type="text"
+            <InputField
+              label="Contact Number"
               name="contact"
               value={formData.contact}
               onChange={handleChange}
-              placeholder= "Your contact number"
-              required
             />
-            <div style={{ marginBottom: "20px" }}>
+
+            <div style={{ marginBottom: "22px" }}>
               <label style={labelStyle}>Message</label>
               <textarea
                 name="message"
-                required
                 value={formData.message}
                 onChange={handleChange}
-                style={{ ...inputStyle, height: "120px", resize: "vertical" }}
-                placeholder="Type your message here..."
-                aria-label="Message"
+                style={textarea}
+                placeholder="Describe your inquiry clearly"
               />
             </div>
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: "100%",
-                backgroundColor: loading ? "#95a5a6" : "#27ae60",
-                color: "#fff",
-                padding: "14px",
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "16px",
-                fontWeight: "bold",
-                cursor: loading ? "not-allowed" : "pointer",
-                transition: "0.3s",
-              }}
-              aria-live="polite"
-              onMouseOver={(e) => !loading && (e.target.style.backgroundColor = "#1e8449")}
-              onMouseOut={(e) => !loading && (e.target.style.backgroundColor = "#27ae60")}
-            >
-              {loading ? "Sending..." : "Send Message"}
+
+            <button type="submit" disabled={loading} style={button}>
+              {loading ? "Submitting..." : "Submit Request"}
             </button>
           </form>
-
-          {/* Contact Info */}
-          <div style={{ flex: "1 1 300px", display: "flex", flexDirection: "column", gap: "25px" }}>
-            <ContactCard
-              icon={<FaPhoneAlt size={22} color="#27ae60" />}
-              title="Phone"
-              value={<a href="tel:+919876543210" style={{ color: "#636e72", textDecoration: "none" }}>+91 98765 43210</a>}
-            />
-            <ContactCard
-              icon={<FaEnvelope size={22} color="#2980b9" />}
-              title="Email"
-              value={<a href="mailto:support@quickmart.com" style={{ color: "#636e72", textDecoration: "none" }}>support@quickmart.com</a>}
-            />
-            <ContactCard
-              icon={<FaMapMarkerAlt size={22} color="#e67e22" />}
-              title="Address"
-              value={<span style={{ color: "#636e72" }}>KisanMart Headquarters<br/>Mumbai, Maharashtra, India</span>}
-            />
-          </div>
-        </div>
-      </section>
-    </main>
+        </section>
+      </div>
+    </div>
   );
 };
 
-/* Reusable Input Field */
-const FormField = ({ label, type, name, value, onChange, placeholder, required }) => (
-  <div style={{ marginBottom: "20px" }}>
+/* ---------------- Reusable Components ---------------- */
+
+const InputField = ({ label, name, value, onChange }) => (
+  <div style={{ marginBottom: "22px" }}>
     <label style={labelStyle}>{label}</label>
     <input
-      type={type}
       name={name}
       value={value}
       onChange={onChange}
-      placeholder={placeholder}
-      required={required}
-      style={inputStyle}
+      style={input}
+      placeholder={label}
     />
   </div>
 );
 
-const labelStyle = { display: "block", marginBottom: "6px", fontWeight: "600", color: "#2c3e50" };
-
-const inputStyle = {
-  width: "100%",
-  padding: "12px",
-  border: "1px solid #ccc",
-  borderRadius: "8px",
-  fontSize: "1rem",
-  transition: "0.3s",
-};
-
-const ContactCard = ({ icon, title, value }) => (
-  <div
-    style={{
-      background: "#fff",
-      padding: "20px",
-      borderRadius: "10px",
-      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-      display: "flex",
-      alignItems: "center",
-      gap: "15px",
-      transition: "transform 0.3s, box-shadow 0.3s",
-    }}
-    onMouseOver={(e) => {
-      e.currentTarget.style.transform = "translateY(-6px)";
-      e.currentTarget.style.boxShadow = "0 6px 18px rgba(0,0,0,0.15)";
-    }}
-    onMouseOut={(e) => {
-      e.currentTarget.style.transform = "translateY(0)";
-      e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
-    }}
-  >
-    {icon}
-    <div>
-      <strong style={{ display: "block", color: "#2c3e50", fontSize: "1.1rem" }}>{title}</strong>
-      <span style={{ color: "#636e72" }}>{value}</span>
-    </div>
+const InfoRow = ({ icon, text }) => (
+  <div style={infoRow}>
+    <span style={{ color: "#2e7d32" }}>{icon}</span>
+    <span>{text}</span>
   </div>
 );
+
+/* ---------------- Styles ---------------- */
+
+const page = {
+  minHeight: "100vh",
+  background: "#f4f6f5",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
+
+const container = {
+  width: "1100px",
+  background: "#ffffff",
+  display: "flex",
+  border: "1px solid #e0e0e0",
+};
+
+const leftPanel = {
+  width: "35%",
+  padding: "40px",
+  borderRight: "1px solid #e0e0e0",
+  background: "#fafafa",
+};
+
+const rightPanel = {
+  width: "65%",
+  padding: "40px 50px",
+};
+
+const brand = {
+  fontSize: "26px",
+  fontWeight: "700",
+  color: "#1b5e20",
+};
+
+const tagline = {
+  marginTop: "12px",
+  fontSize: "14px",
+  color: "#555",
+  lineHeight: "1.6",
+};
+
+const infoBlock = {
+  marginTop: "30px",
+  display: "flex",
+  flexDirection: "column",
+  gap: "14px",
+};
+
+const infoRow = {
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+  fontSize: "14px",
+  color: "#333",
+};
+
+const businessBox = {
+  marginTop: "40px",
+  fontSize: "14px",
+  color: "#444",
+};
+
+const formTitle = {
+  fontSize: "22px",
+  fontWeight: "600",
+  marginBottom: "6px",
+};
+
+const formDesc = {
+  fontSize: "14px",
+  color: "#666",
+  marginBottom: "30px",
+};
+
+const form = {
+  maxWidth: "520px",
+};
+
+const labelStyle = {
+  display: "block",
+  marginBottom: "6px",
+  fontSize: "13px",
+  fontWeight: "600",
+  color: "#333",
+};
+
+const input = {
+  width: "100%",
+  padding: "11px",
+  border: "1px solid #ccc",
+  fontSize: "14px",
+};
+
+const textarea = {
+  width: "100%",
+  height: "120px",
+  padding: "11px",
+  border: "1px solid #ccc",
+  fontSize: "14px",
+  resize: "none",
+};
+
+const button = {
+  padding: "12px 22px",
+  background: "#1b5e20",
+  color: "#fff",
+  border: "none",
+  fontSize: "14px",
+  fontWeight: "600",
+  cursor: "pointer",
+};
 
 export default ContactUs;
