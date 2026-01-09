@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
 import { useAppContext } from "../Context/AppContext";
 import toast from "react-hot-toast";
+import { NavLink } from "react-router-dom";
+
 
 const ContactUs = () => {
   const { axios } = useAppContext();
@@ -53,7 +55,10 @@ const ContactUs = () => {
       <div style={container}>
         {/* LEFT PANEL */}
         <aside style={leftPanel}>
-          <h2 style={brand}>KisanMart</h2>
+          {/* <h2 style={brand}>KisanMart</h2> */}
+          <NavLink to="/" className="text-orange-400 text-3xl font-bold">
+            Kisan<span className="text-green-500">Mart</span>
+          </NavLink>
           <p style={tagline}>
             A digital agriculture marketplace providing quality seeds,
             fertilizers, tools, and farming solutions.
@@ -73,7 +78,7 @@ const ContactUs = () => {
             <p>
               Monday – Saturday
               <br />
-              9:00 AM – 6:00 PM
+              9:00 AM – 8:00 PM
             </p>
           </div>
         </aside>
