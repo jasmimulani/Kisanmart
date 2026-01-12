@@ -1,131 +1,187 @@
-import React ,{ useEffect,useState } from 'react'
-import { useAppContext } from '../../Context/AppContext';
-import { assets } from '../../assets/assets';
-import toast from 'react-hot-toast';
+import React, { useEffect, useState } from "react";
+import { useAppContext } from "../../Context/AppContext";
+import { assets } from "../../assets/assets";
+import toast from "react-hot-toast";
 
 const Orders = () => {
-   const {currency ,axios} = useAppContext()
-   const [orders,setOrders] = useState([])
-   const [loading, setLoading] = useState(false)
-   const [deliveryBoys, setDeliveryBoys] = useState([])
+  const { currency, axios } = useAppContext();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [deliveryBoys, setDeliveryBoys] = useState([]);
 
-   const fetchOrders = async () =>{
-    setLoading(true)
+  const fetchOrders = async () => {
+    setLoading(true);
     try {
-        const {data} = await axios.get('/api/order/seller')
-        if(data.success){
-            setOrders(data.orders || [])
-            console.log('Orders fetched:', data.orders); // Log for debugging
-        }else{
-            toast.error(data.message)
-        }
+      const { data } = await axios.get("/api/order/seller");
+      if (data.success) {
+        setOrders(data.orders || []);
+      } else {
+        toast.error(data.message);
+      }
     } catch (error) {
-        toast.error(error.message)
-        console.error('Error fetching orders:', error);
+      toast.error(error.message);
     } finally {
-        setLoading(false)
+      setLoading(false);
     }
-   };
+  };
 
-   const fetchDeliveryBoys = async () => {
+  const fetchDeliveryBoys = async () => {
     try {
-      const { data } = await axios.get('/api/delivery/list')
-      if (data.success) setDeliveryBoys(data.list || [])
+      const { data } = await axios.get("/api/delivery/list");
+      if (data.success) setDeliveryBoys(data.list || []);
     } catch (error) {
-      console.error('Error fetching delivery boys', error)
+      console.error("Error fetching delivery boys", error);
     }
-   }
-useEffect(() =>{
+  };
+
+  useEffect(() => {
     fetchOrders();
     fetchDeliveryBoys();
-    // Auto-refresh orders every 5 seconds to catch payment updates from webhook
     const interval = setInterval(fetchOrders, 5000);
     return () => clearInterval(interval);
-},[])
+  }, []);
 
+  return (
+    <div className="no-scrollbar flex-1 h-[95vh] overflow-y-scroll">
+      <div className="md:p-10 p-4 space-y-4">
 
-   return (
-    <div className='no-scrollbar flex-1 h-[95vh] overflow-y-scroll'>
-        <div className="md:p-10 p-4 space-y-4">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <h2 className="text-lg font-medium">Orders List</h2>
-                <div className="flex items-center gap-4">
-                    <span className="text-gray-600 text-sm font-medium">Total Orders: {orders.length}</span>
-                    <button 
-                        onClick={fetchOrders}
-                        disabled={loading}
-                        className="flex items-center gap-2 px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <img src={assets.refresh_icon} alt="refresh" className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                        {loading ? 'Loading...' : 'Refresh'}
-                    </button>
-                </div>
-            </div>
-            {!orders || orders.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                    <p>No orders found</p>
-                </div>
-            ) : (
-            orders.map((order, index) => (
-                order && (
-                <div key={index} className="flex flex-col  md:items-center  md:flex-row
-                gap-5 justify-between  p-5 max-w-4xl rounded-md border border-gray-300">
-
-                    <div className="flex gap-5 max-w-80">
-                        <img className="w-12 h-12 object-cover " src={assets.box_icon} alt="boxIcon" />
-                        <div>
-                            {order.items && order.items.map((item, index) => (
-                                <div key={index} className="flex flex-col">
-                                    <p className="font-medium">
-                                        {item.product?.name || 'Product Name Not Available'}{" "}
-                                        <span className="text-primary">x {item.quantity || 0}</span>
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="flex gap-2 items-center">
-                      <select className="border p-1 rounded" defaultValue={order.deliveryBoyId || ''} onChange={(e)=>{order._selectedDelivery = e.target.value}}>
-                        <option value="">-- Assign delivery --</option>
-                        {deliveryBoys.map((d)=> (
-                          <option key={d._id} value={d._id}>{d.name} - {d.phone || d.email}</option>
-                        ))}
-                      </select>
-                      <button onClick={async ()=>{
-                        const deliveryBoyId = order._selectedDelivery
-                        if(!deliveryBoyId){ toast.error('select delivery boy') ; return }
-                        try {
-                          const {data} = await axios.put('/api/delivery/assign', { orderId: order._id, deliveryBoyId })
-                          if(data.success){ toast.success(data.message || 'Assigned') ; fetchOrders() }
-                          else toast.error(data.message)
-                        } catch (error) { toast.error(error.message) }
-                      }} className="px-2 py-1 border rounded">Assign</button>
-                    </div>
-
-                    <div className="text-sm md:text-base text-black/60">
-                       
-                        <p>{order.address?.street || 'N/A'}, {order.address?.city || 'N/A'}</p>
-                        <p> {order.address?.state || 'N/A'},{order.address?.zipcode || 'N/A'}</p>
-                        <p>{order.address?.phone || 'N/A'}</p>
-                    </div>
-
-                    <p className="font-medium text-base my-auto ">{currency}{order.amount}</p>
-
-                    <div className="flex flex-col text-sm md:text-base text-black/60">
-                        <p>Method: <span className={`font-medium ${order.paymentType === 'Online' ? 'text-blue-600' : 'text-purple-600'}`}>{order.paymentType === 'Online' ? ' Online' : ' COD'}</span></p>
-                        <p>Date: {new Date(order.createdAt).toLocaleDateString()}</p>
-                        {/* <p className={`font-medium text-base ${order.isPaid ? 'text-green-600' : 'text-orange-600'}`}>
-                            {order.isPaid ? "✅ Paid" : "⏳ Pending"}
-                        </p> */}
-                    </div>
-                </div>
-                )
-            ))
-            )}
+        {/* HEADER */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <h2 className="text-lg font-medium">Orders List</h2>
+          <div className="flex items-center gap-4">
+            <span className="text-gray-600 text-sm font-medium">
+              Total Orders: {orders.length}
+            </span>
+            <button
+              onClick={fetchOrders}
+              disabled={loading}
+              className="flex items-center gap-2 px-3 py-1 text-sm bg-blue-500 text-white rounded"
+            >
+              <img
+                src={assets.refresh_icon}
+                alt="refresh"
+                className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
+              />
+              {loading ? "Loading..." : "Refresh"}
+            </button>
+          </div>
         </div>
-    </div>
-    );
-}
 
-export default Orders
+        {/* NO ORDERS */}
+        {orders.length === 0 ? (
+          <p className="text-center text-gray-500">No orders found</p>
+        ) : (
+          orders.map((order, index) => {
+            // ✅ TOTAL AMOUNT (same logic as MyOrder)
+            const totalAmount = order.items.reduce((sum, item) => {
+              const price =
+                item.product?.offerprice ??
+                item.product?.price ??
+                0;
+              return sum + price * item.quantity;
+            }, 0);
+
+            return (
+              <div
+                key={index}
+                className="flex flex-col md:flex-row gap-5 justify-between p-5 max-w-4xl rounded-md border border-gray-300"
+              >
+                {/* ITEMS */}
+                <div className="flex gap-5 max-w-80">
+                  <img
+                    className="w-12 h-12 object-cover"
+                    src={assets.box_icon}
+                    alt="boxIcon"
+                  />
+                  <div>
+                    {order.items.map((item, i) => (
+                      <p key={i} className="font-medium">
+                        {item.product?.name || "Product"}{" "}
+                        <span className="text-primary">
+                          x {item.quantity}
+                        </span>
+                      </p>
+                    ))}
+                  </div>
+                </div>
+
+                {/* DELIVERY ASSIGN */}
+                <div className="flex gap-2 items-center">
+                  <select
+                    className="border p-1 rounded"
+                    defaultValue={order.deliveryBoyId || ""}
+                    onChange={(e) =>
+                      (order._selectedDelivery = e.target.value)
+                    }
+                  >
+                    <option value="">-- Assign delivery --</option>
+                    {deliveryBoys.map((d) => (
+                      <option key={d._id} value={d._id}>
+                        {d.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <button
+                    onClick={async () => {
+                      const deliveryBoyId = order._selectedDelivery;
+                      if (!deliveryBoyId) {
+                        toast.error("Select delivery boy");
+                        return;
+                      }
+                      try {
+                        const { data } = await axios.put(
+                          "/api/delivery/assign",
+                          { orderId: order._id, deliveryBoyId }
+                        );
+                        if (data.success) {
+                          toast.success("Assigned");
+                          fetchOrders();
+                        } else toast.error(data.message);
+                      } catch (error) {
+                        toast.error(error.message);
+                      }
+                    }}
+                    className="px-2 py-1 border rounded"
+                  >
+                    Assign
+                  </button>
+                </div>
+
+                {/* ADDRESS */}
+                <div className="text-sm text-black/60">
+                  <p>{order.address?.street}</p>
+                  <p>
+                    {order.address?.city}, {order.address?.state}
+                  </p>
+                  <p>{order.address?.phone}</p>
+                </div>
+
+                {/* ✅ TOTAL */}
+                <p className="font-semibold text-primary my-auto">
+                  Total Amount: {currency} {totalAmount}
+                </p>
+
+                {/* PAYMENT */}
+                <div className="text-sm text-black/60">
+                  <p>
+                    Method:
+                    <span className="font-medium ml-1">
+                      {order.paymentType}
+                    </span>
+                  </p>
+                  <p>
+                    Date:{" "}
+                    {new Date(order.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Orders;
