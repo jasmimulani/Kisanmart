@@ -191,7 +191,9 @@ export const getAllOrder = async (req, res) => {
   try {
     console.log('Seller requesting orders...');
     const orders = await Order.find({})
-      .populate("items.product address")
+      .populate("items.product")
+      .populate("address")
+      .populate("userId", "name email phone")
       .sort({ createdAt: -1 });
 
     console.log('Found orders:', orders.length);

@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { assets } from "../assets/assets";
 import { useAppContext } from "../Context/AppContext";
 import toast from "react-hot-toast";
+import { FiLoader } from "react-icons/fi";
 
 const Cart = () => {
   const {
@@ -24,6 +25,8 @@ const Cart = () => {
   const [showAddress, setShowAddress] = useState(false);
   const [selectAddress, setSelectAddress] = useState(null);
   const [paymentOption, setPaymentOption] = useState("COD");
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const isProcessingRef = useRef(false);
 
   /* ---------------- BUILD CART ARRAY ---------------- */
   const getCart = () => {
@@ -55,9 +58,33 @@ const Cart = () => {
 
   /* ---------------- PLACE ORDER ---------------- */
   const PlaceOrder = async () => {
-    try {
-      if (!selectAddress) return toast.error("Please select address");
+    // Prevent multiple submissions
+    if (isProcessingRef.current || isPlacingOrder) {
+      toast.error("Order is already being processed. Please wait...");
+      return;
+    }
 
+    // Validation
+    if (!selectAddress) {
+      toast.error("Please select a delivery address");
+      return;
+    }
+
+    if (!user) {
+      toast.error("Please login to place an order");
+      return;
+    }
+
+    if (cartArray.length === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
+
+    // Set processing state
+    isProcessingRef.current = true;
+    setIsPlacingOrder(true);
+
+    try {
       const payload = {
         userId: user._id,
         items: cartArray.map((item) => ({
@@ -70,19 +97,34 @@ const Cart = () => {
       if (paymentOption === "COD") {
         const { data } = await axios.post("/api/order/cod", payload);
         if (data.success) {
-          toast.success(data.message);
+          toast.success(data.message || "Order placed successfully!");
           SetCartItems({});
-          navigate("/my-orders");
-        } else toast.error(data.message);
+          // Small delay to show success message
+          setTimeout(() => {
+            navigate("/my-orders");
+          }, 500);
+        } else {
+          toast.error(data.message || "Failed to place order");
+          isProcessingRef.current = false;
+          setIsPlacingOrder(false);
+        }
       } else {
         const { data } = await axios.post("/api/order/stripe", payload);
-        if (data.success) {
+        if (data.success && data.url) {
           SetCartItems({});
+          // Redirect to Stripe checkout
           window.location.replace(data.url);
-        } else toast.error(data.message);
+        } else {
+          toast.error(data.message || "Failed to initiate payment");
+          isProcessingRef.current = false;
+          setIsPlacingOrder(false);
+        }
       }
     } catch (error) {
-      toast.error(error.message);
+      console.error("Order placement error:", error);
+      toast.error(error.response?.data?.message || error.message || "Failed to place order. Please try again.");
+      isProcessingRef.current = false;
+      setIsPlacingOrder(false);
     }
   };
 
@@ -255,12 +297,30 @@ const Cart = () => {
 
         <button
           onClick={PlaceOrder}
-          className="w-full mt-6 bg-primary text-white py-3"
+          disabled={isPlacingOrder || cartArray.length === 0 || !selectAddress}
+          className={`w-full mt-6 bg-primary text-white py-3 font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 ${
+            isPlacingOrder || cartArray.length === 0 || !selectAddress
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:bg-primary/90 hover:shadow-lg"
+          }`}
         >
-          {paymentOption === "COD"
-            ? "Place Order"
-            : "Proceed to Checkout"}
+          {isPlacingOrder ? (
+            <>
+              <FiLoader className="w-5 h-5 animate-spin" />
+              <span>Processing Order...</span>
+            </>
+          ) : paymentOption === "COD" ? (
+            "Place Order"
+          ) : (
+            "Proceed to Checkout"
+          )}
         </button>
+        
+        {isPlacingOrder && (
+          <p className="text-sm text-gray-500 text-center mt-2">
+            Please wait while we process your order...
+          </p>
+        )}
       </div>
     </div>
   );

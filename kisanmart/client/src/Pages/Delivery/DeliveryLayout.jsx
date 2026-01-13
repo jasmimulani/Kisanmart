@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useAppContext } from '../../Context/AppContext';
 import { 
   FiPackage, 
   FiTruck, 
@@ -10,64 +11,100 @@ import {
   FiMenu,
   FiX
 } from 'react-icons/fi';
+import toast from 'react-hot-toast';
 
 const DeliveryLayout = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { axios, setDeliveryProfile, setIsDelivery } = useAppContext();
 
   const navItems = [
     { icon: <FiHome className="w-5 h-5" />, label: 'Dashboard', to: '/delivery/dashboard' },
-    { icon: <FiPackage className="w-5 h-5" />, label: 'New Orders', to: '/delivery/orders' },
-    // { icon: <FiTruck className="w-5 h-5" />, label: 'In Progress', to: '/delivery/in-progress' },
-    // { icon: <FiCheckCircle className="w-5 h-5" />, label: 'Completed', to: '/delivery/completed' },
+    { icon: <FiPackage className="w-5 h-5" />, label: 'Orders', to: '/delivery/orders' },
     { icon: <FiUser className="w-5 h-5" />, label: 'Profile', to: '/delivery/profile' },
   ];
 
   const handleLogout = async () => {
     try {
-      // Add your logout logic here
+      await axios.post('/api/delivery/logout');
+      setDeliveryProfile(null);
+      setIsDelivery(false);
+      toast.success('Logged out successfully');
       navigate('/delivery/login');
     } catch (error) {
       console.error('Logout failed:', error);
+      // Still navigate to login even if API call fails
+      setDeliveryProfile(null);
+      setIsDelivery(false);
+      navigate('/delivery/login');
     }
+  };
+
+  const isActive = (path) => {
+    return location.pathname === path;
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Desktop Sidebar */}
       <div className="hidden md:flex md:flex-shrink-0">
-        <div className="flex flex-col w-64 bg-white border-r border-gray-200">
-          <div className="flex items-center justify-center h-16 bg-green-600">
-            <h1 className="text-white text-xl font-bold">Delivery Panel</h1>
+        <div className="flex flex-col w-64 bg-white border-r border-gray-200 shadow-sm">
+          {/* Logo/Header */}
+          <div className="flex items-center justify-center h-20 bg-gradient-to-r from-green-600 to-green-700 shadow-md">
+            <div className="text-center">
+              <h1 className="text-white text-xl font-bold">Kisan Mart</h1>
+              <p className="text-green-100 text-xs mt-1">Delivery Panel</p>
+            </div>
           </div>
-          <nav className="flex-1 px-2 py-4 space-y-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className="flex items-center px-4 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 rounded-md group"
-                activeClassName="bg-green-50 text-green-600"
+
+          {/* Navigation */}
+          <nav className="flex-1 px-3 py-6 space-y-2">
+            {navItems.map((item) => {
+              const active = isActive(item.to);
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={`flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-200 group ${
+                    active
+                      ? 'bg-green-50 text-green-700 shadow-sm border-l-4 border-green-600'
+                      : 'hover:bg-gray-50 hover:text-green-600'
+                  }`}
+                >
+                  <span className={`mr-3 ${active ? 'text-green-600' : 'text-gray-500 group-hover:text-green-600'}`}>
+                    {item.icon}
+                  </span>
+                  <span className="font-medium">{item.label}</span>
+                </Link>
+              );
+            })}
+            
+            <div className="pt-4 border-t border-gray-200 mt-4">
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center px-4 py-3 text-left text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-200 group"
               >
-                <span className="mr-3">{item.icon}</span>
-                {item.label}
-              </Link>
-            ))}
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center px-4 py-3 text-left text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-md group"
-            >
-              <FiLogOut className="mr-3 w-5 h-5" />
-              Logout
-            </button>
+                <FiLogOut className="mr-3 w-5 h-5 text-gray-500 group-hover:text-red-600" />
+                <span className="font-medium">Logout</span>
+              </button>
+            </div>
           </nav>
+
+          {/* Footer */}
+          <div className="p-4 border-t border-gray-200 bg-gray-50">
+            <p className="text-xs text-gray-500 text-center">
+              © 2024 Kisan Mart
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Mobile menu button */}
-      <div className="md:hidden fixed top-4 left-4 z-20">
+      <div className="md:hidden fixed top-4 left-4 z-50">
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2 rounded-md text-gray-500 hover:bg-gray-100 focus:outline-none"
+          className="p-2 rounded-lg bg-white shadow-lg text-gray-700 hover:bg-gray-100 focus:outline-none transition-colors"
         >
           {isMobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
         </button>
@@ -75,37 +112,53 @@ const DeliveryLayout = () => {
 
       {/* Mobile menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-10">
+        <div className="md:hidden fixed inset-0 z-40">
           <div 
-            className="fixed inset-0 bg-black bg-opacity-50"
+            className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          <div className="fixed inset-y-0 left-0 w-64 bg-white shadow-lg">
-            <div className="flex items-center justify-center h-16 bg-green-600">
-              <h1 className="text-white text-xl font-bold">Delivery Panel</h1>
+          <div className="fixed inset-y-0 left-0 w-64 bg-white shadow-xl transform transition-transform">
+            {/* Mobile Header */}
+            <div className="flex items-center justify-center h-20 bg-gradient-to-r from-green-600 to-green-700">
+              <div className="text-center">
+                <h1 className="text-white text-xl font-bold">Kisan Mart</h1>
+                <p className="text-green-100 text-xs mt-1">Delivery Panel</p>
+              </div>
             </div>
-            <nav className="flex-1 px-2 py-4 space-y-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className="flex items-center px-4 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600"
-                  onClick={() => setIsMobileMenuOpen(false)}
+
+            {/* Mobile Navigation */}
+            <nav className="flex-1 px-3 py-6 space-y-2">
+              {navItems.map((item) => {
+                const active = isActive(item.to);
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={`flex items-center px-4 py-3 rounded-lg transition-all ${
+                      active
+                        ? 'bg-green-50 text-green-700 border-l-4 border-green-600'
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <span className="mr-3">{item.icon}</span>
+                    <span className="font-medium">{item.label}</span>
+                  </Link>
+                );
+              })}
+              
+              <div className="pt-4 border-t border-gray-200 mt-4">
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg"
                 >
-                  <span className="mr-3">{item.icon}</span>
-                  {item.label}
-                </Link>
-              ))}
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full flex items-center px-4 py-3 text-left text-gray-700 hover:bg-red-50 hover:text-red-600"
-              >
-                <FiLogOut className="mr-3 w-5 h-5" />
-                Logout
-              </button>
+                  <FiLogOut className="mr-3 w-5 h-5" />
+                  <span className="font-medium">Logout</span>
+                </button>
+              </div>
             </nav>
           </div>
         </div>
@@ -114,7 +167,7 @@ const DeliveryLayout = () => {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50">
-          <div className="container mx-auto px-4 py-6 md:py-8">
+          <div className="w-full">
             <Outlet />
           </div>
         </main>

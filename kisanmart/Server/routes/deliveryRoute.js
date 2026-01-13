@@ -5,7 +5,10 @@ import {
   isDeliveryAuth,
   deliveryLogout,
   getAssignedOrders,
+  getDeliveryStats,
   updateOrderStatus,
+  updateDeliveryProfile,
+  changeDeliveryPassword,
   assignOrder,
   listDeliveryBoys,
   createDeliveryByAdmin,
@@ -22,7 +25,10 @@ router.get('/is-auth', authDeliveryBoy, isDeliveryAuth)
 router.post('/logout', authDeliveryBoy, deliveryLogout)
 
 router.get('/orders', authDeliveryBoy, getAssignedOrders)
+router.get('/stats', authDeliveryBoy, getDeliveryStats)
 router.put('/order/status', authDeliveryBoy, updateOrderStatus)
+router.put('/profile', authDeliveryBoy, updateDeliveryProfile)
+router.put('/change-password', authDeliveryBoy, changeDeliveryPassword)
 
 // Admin assign order
 router.put('/assign', authSeller, assignOrder)

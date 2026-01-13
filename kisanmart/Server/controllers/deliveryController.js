@@ -109,10 +109,68 @@ export const deliveryLogout = async (req, res) => {
 export const getAssignedOrders = async (req, res) => {
   try {
     const { deliveryBoyId } = req.body
-    const orders = await Order.find({ deliveryBoyId }).populate('items.product')
+    const orders = await Order.find({ deliveryBoyId })
+      .populate('items.product')
+      .populate('address')
+      .populate('userId', 'name email phone')
+      .sort({ createdAt: -1 })
     return res.json({ success: true, orders })
   } catch (error) {
     console.error('getAssignedOrders', error)
+    res.json({ success: false, message: error.message })
+  }
+}
+
+// get delivery statistics
+export const getDeliveryStats = async (req, res) => {
+  try {
+    const { deliveryBoyId } = req.body
+    
+    const orders = await Order.find({ deliveryBoyId })
+    
+    const stats = {
+      pending: 0,
+      inProgress: 0,
+      completed: 0,
+      totalEarnings: 0,
+      totalOrders: orders.length,
+      todayOrders: 0,
+      thisWeekOrders: 0,
+      thisMonthOrders: 0,
+    }
+    
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    const weekAgo = new Date()
+    weekAgo.setDate(weekAgo.getDate() - 7)
+    
+    const monthAgo = new Date()
+    monthAgo.setMonth(monthAgo.getMonth() - 1)
+    
+    orders.forEach((order) => {
+      const orderDate = new Date(order.createdAt)
+      
+      // Count by status
+      if (order.status === 'Assigned to delivery' || order.status === 'pending') {
+        stats.pending++
+      } else if (order.status === 'Out for delivery' || order.status === 'accepted') {
+        stats.inProgress++
+      } else if (order.status === 'Delivered' || order.status === 'completed') {
+        stats.completed++
+        // Calculate earnings (assuming 5% commission or fixed amount)
+        stats.totalEarnings += order.amount * 0.05 // 5% commission
+      }
+      
+      // Count by time period
+      if (orderDate >= today) stats.todayOrders++
+      if (orderDate >= weekAgo) stats.thisWeekOrders++
+      if (orderDate >= monthAgo) stats.thisMonthOrders++
+    })
+    
+    return res.json({ success: true, stats })
+  } catch (error) {
+    console.error('getDeliveryStats', error)
     res.json({ success: false, message: error.message })
   }
 }
@@ -224,6 +282,73 @@ export const claimDeliveryToken = async (req, res) => {
     return res.json({ success: true, message: 'Token claimed', profile: { name: delivery.name, email: delivery.email, phone: delivery.phone } })
   } catch (error) {
     console.error('claimDeliveryToken', error)
+    res.json({ success: false, message: error.message })
+  }
+}
+
+// update delivery profile
+export const updateDeliveryProfile = async (req, res) => {
+  try {
+    const { deliveryBoyId } = req.body
+    const { name, email, phone } = req.body
+
+    if (!deliveryBoyId) return res.json({ success: false, message: 'Not authorized' })
+
+    const delivery = await DeliveryBoy.findById(deliveryBoyId)
+    if (!delivery) return res.json({ success: false, message: 'Delivery boy not found' })
+
+    // Check if email is being changed and if it's already taken
+    if (email && email !== delivery.email) {
+      const inputEmail = String(email).trim().toLowerCase()
+      if (!inputEmail.includes('@') || !inputEmail.endsWith('.com')) {
+        return res.json({ success: false, message: "Email must contain '@' and end with '.com'" })
+      }
+      const existing = await DeliveryBoy.findOne({ email: inputEmail })
+      if (existing) return res.json({ success: false, message: 'Email already in use' })
+      delivery.email = inputEmail
+    }
+
+    if (name) delivery.name = name
+    if (phone) delivery.phone = phone
+
+    await delivery.save()
+
+    const updatedProfile = await DeliveryBoy.findById(deliveryBoyId).select('-password')
+    return res.json({ success: true, message: 'Profile updated', profile: updatedProfile })
+  } catch (error) {
+    console.error('updateDeliveryProfile', error)
+    res.json({ success: false, message: error.message })
+  }
+}
+
+// change password
+export const changeDeliveryPassword = async (req, res) => {
+  try {
+    const { deliveryBoyId } = req.body
+    const { currentPassword, newPassword } = req.body
+
+    if (!deliveryBoyId) return res.json({ success: false, message: 'Not authorized' })
+    if (!currentPassword || !newPassword) {
+      return res.json({ success: false, message: 'Current password and new password required' })
+    }
+
+    if (newPassword.length < 6) {
+      return res.json({ success: false, message: 'Password must be at least 6 characters' })
+    }
+
+    const delivery = await DeliveryBoy.findById(deliveryBoyId)
+    if (!delivery) return res.json({ success: false, message: 'Delivery boy not found' })
+
+    const isMatch = await bcrypt.compare(currentPassword, delivery.password)
+    if (!isMatch) return res.json({ success: false, message: 'Current password is incorrect' })
+
+    const hashed = await bcrypt.hash(newPassword, 10)
+    delivery.password = hashed
+    await delivery.save()
+
+    return res.json({ success: true, message: 'Password changed successfully' })
+  } catch (error) {
+    console.error('changeDeliveryPassword', error)
     res.json({ success: false, message: error.message })
   }
 }

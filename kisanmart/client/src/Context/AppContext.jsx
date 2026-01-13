@@ -9,7 +9,7 @@ axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 export const AppContext = createContext();
 
 export const AppContextProvider = ({ children }) => {
-  const currency = import.meta.env.VITE_CURRENCY;
+  const currency = import.meta.env.VITE_CURRENCY || "₹";
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
@@ -193,6 +193,7 @@ export const AppContextProvider = ({ children }) => {
     isSeller,
     setIsSeller,
     sellerProfile,
+    setSellerProfile,
     isDelivery,
     setIsDelivery,
     deliveryProfile,
