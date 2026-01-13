@@ -87,7 +87,7 @@ const Dashboard = () => {
       </h2>
 
       {/* 🔹 STATS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard title="Pending" value={stats.pending} icon={<FiPackage />} />
         <StatCard title="In Progress" value={stats.inProgress} icon={<FiClock />} />
         <StatCard title="Completed" value={stats.completed} icon={<FiCheckCircle />} />
@@ -95,7 +95,7 @@ const Dashboard = () => {
           title="Earnings"
           value={`${currency}${stats.totalEarnings}`}      
         />
-      </div>
+      </div> */}
 
       {/* 🔹 RECENT 10 ORDERS */}
       <div className="space-y-4">
