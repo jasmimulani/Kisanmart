@@ -111,7 +111,7 @@ const Dashboard = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-3xl font-bold text-gray-800">
-            Welcome, {deliveryProfile?.name || "Delivery Partner"} 👋
+            Welcome, {deliveryProfile?.name || "Delivery Partner"} 
           </h2>
           <p className="text-gray-600 mt-1">Here's your delivery overview</p>
         </div>
