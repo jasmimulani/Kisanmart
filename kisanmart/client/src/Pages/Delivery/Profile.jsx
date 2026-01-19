@@ -147,7 +147,7 @@ const Profile = () => {
         <div className="space-y-6">
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+            <label className=" text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
               <FiUser className="w-4 h-4" />
               Full Name
             </label>
@@ -167,7 +167,7 @@ const Profile = () => {
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+            <label className=" text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
               <FiMail className="w-4 h-4" />
               Email Address
             </label>
@@ -187,7 +187,7 @@ const Profile = () => {
 
           {/* Phone */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+            <label className=" text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
               <FiPhone className="w-4 h-4" />
               Phone Number
             </label>
