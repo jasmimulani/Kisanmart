@@ -315,7 +315,7 @@ const Profile = () => {
       </div>
 
       {/* Account Info */}
-      <div className="bg-gray-50 rounded-lg p-6">
+      {/* <div className="bg-gray-50 rounded-lg p-6">
         <h3 className="text-lg font-semibold mb-4 text-gray-800">Account Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div>
@@ -335,7 +335,7 @@ const Profile = () => {
             </p>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
