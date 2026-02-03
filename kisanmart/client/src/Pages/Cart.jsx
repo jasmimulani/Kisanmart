@@ -2,7 +2,17 @@ import React, { useEffect, useState, useRef } from "react";
 import { assets } from "../assets/assets";
 import { useAppContext } from "../Context/AppContext";
 import toast from "react-hot-toast";
-import { FiLoader } from "react-icons/fi";
+import {
+  FiLoader,
+  FiTrash2,
+  FiPlus,
+  FiMinus,
+  FiMapPin,
+  FiCreditCard,
+  FiShoppingBag,
+  FiArrowLeft,
+  FiArrowRight
+} from "react-icons/fi";
 
 const Cart = () => {
   const {
@@ -58,13 +68,11 @@ const Cart = () => {
 
   /* ---------------- PLACE ORDER ---------------- */
   const PlaceOrder = async () => {
-    // Prevent multiple submissions
     if (isProcessingRef.current || isPlacingOrder) {
       toast.error("Order is already being processed. Please wait...");
       return;
     }
 
-    // Validation
     if (!selectAddress) {
       toast.error("Please select a delivery address");
       return;
@@ -80,7 +88,6 @@ const Cart = () => {
       return;
     }
 
-    // Set processing state
     isProcessingRef.current = true;
     setIsPlacingOrder(true);
 
@@ -99,7 +106,6 @@ const Cart = () => {
         if (data.success) {
           toast.success(data.message || "Order placed successfully!");
           SetCartItems({});
-          // Small delay to show success message
           setTimeout(() => {
             navigate("/my-orders");
           }, 500);
@@ -112,7 +118,6 @@ const Cart = () => {
         const { data } = await axios.post("/api/order/stripe", payload);
         if (data.success && data.url) {
           SetCartItems({});
-          // Redirect to Stripe checkout
           window.location.replace(data.url);
         } else {
           toast.error(data.message || "Failed to initiate payment");
@@ -128,7 +133,6 @@ const Cart = () => {
     }
   };
 
-  /* ---------------- EFFECTS ---------------- */
   useEffect(() => {
     if (products.length && cartItems) getCart();
   }, [products, cartItems]);
@@ -140,187 +144,242 @@ const Cart = () => {
   if (!products.length || !cartItems) return null;
 
   return (
-    <div className="flex flex-col md:flex-row mt-16">
-      {/* ---------------- CART LIST ---------------- */}
-      <div className="flex-1 max-w-4xl">
-        <h1 className="text-3xl font-medium mb-6">
-          Shopping Cart{" "}
-          <span className="text-sm text-primary">
-            {getCartCount()} Items
-          </span>
-        </h1>
-
-        <div className="grid grid-cols-[2fr_1fr_1fr] text-gray-500 font-medium pb-3">
-          <p>Product Details</p>
-          <p className="text-center">Subtotal</p>
-          <p className="text-center">Action</p>
+    <div className="min-h-screen bg-[#faf9f6] py-12 px-4 md:px-8 lg:px-16 mt-16">
+      <div className="max-w-7xl mx-auto">
+        {/* HEADER SECTION */}
+        <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 text-emerald-600 font-black uppercase tracking-widest text-sm mb-2">
+              <FiShoppingBag className="w-5 h-5" />
+              <span>Checkout Process</span>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-black text-stone-900 leading-tight">
+              My Shopping <span className="text-emerald-600">Basket</span>
+            </h1>
+          </div>
+          <button
+            onClick={() => navigate("/products")}
+            className="flex items-center gap-2 text-stone-500 font-bold hover:text-emerald-700 transition"
+          >
+            <FiArrowLeft className="w-5 h-5" />
+            <span>Continue Harvesting</span>
+          </button>
         </div>
 
-        {cartArray.map((product) => (
-          <div
-            key={product._id}
-            className="grid grid-cols-[2fr_1fr_1fr] items-center pt-4"
-          >
-            <div className="flex gap-4">
-              <img
-                src={product.image[0]}
-                alt={product.name}
-                className="w-24 h-24 object-cover border rounded cursor-pointer"
-                onClick={() =>
-                  navigate(
-                    `/products/${product.category.toLowerCase()}/${product._id}`
-                  )
-                }
-              />
-              <div>
-                <p className="font-semibold">{product.name}</p>
+        <div className="flex flex-col lg:flex-row gap-12">
+          {/* CART ITEMS LIST */}
+          <div className="flex-1 space-y-6">
+            {cartArray.length === 0 ? (
+              <div className="bg-white rounded-[2rem] p-20 text-center border border-stone-100 shadow-sm flex flex-col items-center">
+                <div className="w-24 h-24 bg-stone-100 rounded-full flex items-center justify-center mb-6">
+                  <FiShoppingBag className="w-10 h-10 text-stone-300" />
+                </div>
+                <h3 className="text-2xl font-black text-stone-800 mb-2">Your basket is empty</h3>
+                <p className="text-stone-500 mb-8 max-w-xs">Looks like you haven't added any farm-fresh products yet.</p>
+                <button
+                  onClick={() => navigate("/products")}
+                  className="px-10 py-4 bg-emerald-700 text-white rounded-full font-black text-lg shadow-xl shadow-emerald-900/10 hover:bg-emerald-800 transition transform hover:-translate-y-1"
+                >
+                  Start Shopping
+                </button>
+              </div>
+            ) : (
+              cartArray.map((product) => (
+                <div
+                  key={product._id}
+                  className="group bg-white rounded-[2rem] p-6 flex flex-col sm:flex-row items-center gap-6 border border-stone-100 shadow-sm transition-all duration-300 hover:shadow-xl hover:border-emerald-100"
+                >
+                  {/* Product Image */}
+                  <div className="relative w-full sm:w-32 h-32 flex-shrink-0">
+                    <img
+                      src={product.image[0]}
+                      alt={product.name}
+                      className="w-full h-full object-cover rounded-2xl cursor-pointer"
+                      onClick={() => navigate(`/product/${product._id}`)}
+                    />
+                  </div>
 
-                <div className="flex items-center gap-3 mt-3">
+                  {/* Details */}
+                  <div className="flex-1">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                      <div>
+                        <h3 className="font-black text-stone-800 text-xl leading-tight hover:text-emerald-700 cursor-pointer transition" onClick={() => navigate(`/product/${product._id}`)}>
+                          {product.name}
+                        </h3>
+                        <p className="text-sm text-stone-400 font-medium mt-1">🌿 Premium Quality</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-black text-emerald-800 tracking-tight">
+                          {currency}{product.offerprice * product.quantity}
+                        </p>
+                        <p className="text-xs text-stone-400 font-bold uppercase tracking-widest mt-1">
+                          {currency}{product.offerprice} / unit
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between mt-6">
+                      {/* Qty Controls */}
+                      <div className="flex items-center bg-stone-100 rounded-2xl p-1 border border-stone-200">
+                        <button
+                          onClick={() => decreaseQty(product._id)}
+                          className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-emerald-700 shadow-sm hover:bg-emerald-700 hover:text-white transition-all"
+                        >
+                          <FiMinus className="w-5 h-5" />
+                        </button>
+                        <span className="w-12 text-center font-black text-emerald-900 text-lg">
+                          {cartItems[product._id]}
+                        </span>
+                        <button
+                          onClick={() => increaseQty(product._id)}
+                          className="w-10 h-10 flex items-center justify-center rounded-xl bg-white text-emerald-700 shadow-sm hover:bg-emerald-700 hover:text-white transition-all"
+                        >
+                          <FiPlus className="w-5 h-5" />
+                        </button>
+                      </div>
+
+                      {/* Remove */}
+                      <button
+                        onClick={() => removeFromCart(product._id)}
+                        className="p-3 text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all"
+                        title="Remove Item"
+                      >
+                        <FiTrash2 className="w-6 h-6" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* SUMMARY SIDEBAR */}
+          <div className="w-full lg:w-[400px]">
+            <div className="bg-white rounded-[2.5rem] p-8 border border-stone-100 shadow-2xl shadow-stone-200/50 sticky top-24">
+              <h2 className="text-2xl font-black text-stone-900 mb-8">Harvest Summary</h2>
+
+              {/* Delivery Address Section */}
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <p className="flex items-center gap-2 text-stone-400 text-xs font-black uppercase tracking-widest">
+                    <FiMapPin className="text-emerald-600" />
+                    <span>Delivery To</span>
+                  </p>
                   <button
-                    onClick={() => decreaseQty(product._id)}
-                    className="px-3 py-1 bg-gray-200 rounded font-bold"
+                    onClick={() => setShowAddress(!showAddress)}
+                    className="text-emerald-700 font-bold text-xs hover:underline"
                   >
-                    −
-                  </button>
-
-                  <span className="font-semibold">
-                    {cartItems[product._id]}
-                  </span>
-
-                  <button
-                    onClick={() => increaseQty(product._id)}
-                    className="px-3 py-1 bg-gray-200 rounded font-bold"
-                  >
-                    +
+                    {selectAddress ? "Edit" : "Select"}
                   </button>
                 </div>
+
+                <div className="bg-stone-50/50 rounded-3xl p-5 border border-stone-100">
+                  {selectAddress ? (
+                    <div>
+                      <p className="text-stone-800 font-bold leading-tight">
+                        {selectAddress.street}
+                      </p>
+                      <p className="text-stone-500 text-sm mt-1">
+                        {selectAddress.city}, {selectAddress.state}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-stone-400 italic text-sm">No delivery address selected</p>
+                  )}
+                </div>
+
+                {showAddress && (
+                  <div className="mt-4 bg-white border border-stone-100 rounded-3xl shadow-xl overflow-hidden max-h-60 overflow-y-auto z-30 relative">
+                    {addresses.map((address, i) => (
+                      <p
+                        key={i}
+                        onClick={() => {
+                          setSelectAddress(address);
+                          setShowAddress(false);
+                        }}
+                        className="p-4 text-sm font-bold text-stone-700 cursor-pointer hover:bg-emerald-50 hover:text-emerald-800 transition-colors border-b border-stone-50 last:border-0"
+                      >
+                        {address.street}, {address.city}
+                      </p>
+                    ))}
+                    <p
+                      onClick={() => navigate("/add-address")}
+                      className="p-4 text-center text-emerald-700 font-black text-sm cursor-pointer hover:bg-emerald-50"
+                    >
+                      + Add New Location
+                    </p>
+                  </div>
+                )}
               </div>
-            </div>
 
-            <p className="text-center">
-              {currency}
-              {product.offerprice * product.quantity}
-            </p>
+              {/* Payment Select */}
+              <div className="mb-8">
+                <p className="flex items-center gap-2 text-stone-400 text-xs font-black uppercase tracking-widest mb-4">
+                  <FiCreditCard className="text-emerald-600" />
+                  <span>Payment Method</span>
+                </p>
+                <div className="relative">
+                  <select
+                    onChange={(e) => setPaymentOption(e.target.value)}
+                    className="w-full bg-stone-50 border border-stone-100 p-4 rounded-3xl font-bold text-stone-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 appearance-none cursor-pointer"
+                  >
+                    <option value="COD">Cash On Delivery (Organic)</option>
+                    <option value="Online">Online Payment (Stripe)</option>
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
+                    ▼
+                  </div>
+                </div>
+              </div>
 
-            <button
-              onClick={() => removeFromCart(product._id)}
-              className="mx-auto"
-            >
-              <img
-                src={assets.remove_icon}
-                alt="remove"
-                className="w-6 h-6"
-              />
-            </button>
-          </div>
-        ))}
+              {/* Price Calculation */}
+              <div className="space-y-4 border-t border-stone-100 pt-8 mb-8">
+                <div className="flex justify-between items-center">
+                  <span className="text-stone-500 font-bold">Subtotal</span>
+                  <span className="text-stone-800 font-bold">{currency}{getCartAmount()}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-stone-500 font-bold">Logistics</span>
+                  <span className="text-emerald-600 font-black uppercase tracking-widest text-[10px] bg-emerald-50 px-2 py-1 rounded-full">FREE</span>
+                </div>
+                <div className="flex justify-between items-center pt-2">
+                  <span className="text-xl font-black text-stone-900">Total Total</span>
+                  <span className="text-3xl font-black text-emerald-900 tracking-tight">
+                    {currency}{getCartAmount()}
+                  </span>
+                </div>
+              </div>
 
-        <button
-          onClick={() => navigate("/products")}
-          className="mt-8 text-primary font-medium"
-        >
-          ← Continue Shopping
-        </button>
-      </div>
-
-      {/* ---------------- ORDER SUMMARY ---------------- */}
-      <div className="max-w-[360px] w-full  p-5 border ml-8">
-        <h2 className="text-xl font-medium">Order Summary</h2>
-        <hr className="my-4" />
-
-        <p className="text-sm font-medium uppercase">Delivery Address</p>
-        <p className="text-gray-500 mt-2">
-          {selectAddress
-            ? `${selectAddress.street}, ${selectAddress.city}, ${selectAddress.state}, ${selectAddress.country}`
-            : "No address found"}
-        </p>
-
-        <button
-          onClick={() => setShowAddress(!showAddress)}
-          className="text-primary mt-2"
-        >
-          Change Address
-        </button>
-
-        {showAddress && (
-          <div className="border mt-2 bg-white">
-            {addresses.map((address, i) => (
-              <p
-                key={i}
-                onClick={() => {
-                  setSelectAddress(address);
-                  setShowAddress(false);
-                }}
-                className="p-2 cursor-pointer hover:bg-gray-100"
+              {/* Action Button */}
+              <button
+                onClick={PlaceOrder}
+                disabled={isPlacingOrder || cartArray.length === 0 || !selectAddress}
+                className={`group w-full py-5 rounded-[2rem] font-black text-xl transition-all duration-300 flex items-center justify-center gap-3 shadow-2xl ${isPlacingOrder || cartArray.length === 0 || !selectAddress
+                  ? "bg-stone-100 text-stone-400 cursor-not-allowed shadow-none"
+                  : "bg-emerald-700 text-white hover:bg-emerald-800 hover:-translate-y-1 shadow-emerald-900/10 active:scale-95"
+                  }`}
               >
-                {address.street}, {address.city}
-              </p>
-            ))}
-            <p
-              onClick={() => navigate("/add-address")}
-              className="p-2 text-center text-primary cursor-pointer"
-            >
-              Add new address
-            </p>
+                {isPlacingOrder ? (
+                  <>
+                    <FiLoader className="w-6 h-6 animate-spin" />
+                    <span>Harvesting Order...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Confirm Order</span>
+                    <FiArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
+              </button>
+
+              {!selectAddress && cartArray.length > 0 && (
+                <p className="text-xs text-center text-red-500 font-bold mt-4 animate-pulse">
+                  ⚠ Please specify a delivery location
+                </p>
+              )}
+            </div>
           </div>
-        )}
-
-        <p className="text-sm font-medium uppercase mt-6">
-          Payment Method
-        </p>
-        <select
-          onChange={(e) => setPaymentOption(e.target.value)}
-          className="w-full border p-2 mt-2"
-        >
-          <option value="COD">Cash On Delivery</option>
-          <option value="Online">Online Payment</option>
-        </select>
-
-        <hr className="my-4" />
-
-        <div className="space-y-2 text-gray-600">
-          <p className="flex justify-between">
-            <span>Price</span>
-            <span>
-              {currency}
-              {getCartAmount()}
-            </span>
-          </p>
-          <p className="flex justify-between font-semibold text-lg">
-            <span>Total</span>
-            <span>
-              {currency}
-              {getCartAmount()}
-            </span>
-          </p>
         </div>
-
-        <button
-          onClick={PlaceOrder}
-          disabled={isPlacingOrder || cartArray.length === 0 || !selectAddress}
-          className={`w-full mt-6 bg-primary text-white py-3 font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 ${
-            isPlacingOrder || cartArray.length === 0 || !selectAddress
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-primary/90 hover:shadow-lg"
-          }`}
-        >
-          {isPlacingOrder ? (
-            <>
-              <FiLoader className="w-5 h-5 animate-spin" />
-              <span>Processing Order...</span>
-            </>
-          ) : paymentOption === "COD" ? (
-            "Place Order"
-          ) : (
-            "Proceed to Checkout"
-          )}
-        </button>
-        
-        {isPlacingOrder && (
-          <p className="text-sm text-gray-500 text-center mt-2">
-            Please wait while we process your order...
-          </p>
-        )}
       </div>
     </div>
   );

@@ -33,7 +33,9 @@ import DeliveryList from './Pages/Seller/DeliveryList'
 import CreateDelivery from './Pages/Seller/CreateDelivery'
 import Dashboard from './Pages/Delivery/Dashboard';
 const App = () => {
-  const isPanelPath = useLocation().pathname.includes("seller") || useLocation().pathname.includes("delivery")
+  const location = useLocation()
+  const isPanelPath = location.pathname.includes("seller") || location.pathname.includes("delivery")
+  const isHome = location.pathname === "/"
   const { showUserLogin, isSeller, isDelivery } = useAppContext()
 
   return (
@@ -67,7 +69,7 @@ const App = () => {
         }}
       />
 
-      <div className={`${isPanelPath ? "" : " px-6 md:px-16 lg:px-24 xl:px-32"} `}>
+      <div className={`${isPanelPath || isHome ? "" : " px-6 md:px-16 lg:px-24 xl:px-32"}`}>
         <Routes>
           <Route path='/' element={<Home />} />
           <Route path='/products' element={<AllProduct />} />
