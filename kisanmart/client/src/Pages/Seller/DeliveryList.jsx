@@ -41,7 +41,7 @@ const DeliveryList = () => {
 
   return (
     <div className="min-h-screen p-8 font-sans">
-      <h2 className="text-2xl font-semibold mb-6 text-gray-800">🚚 Delivery Boys</h2>
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800"> Delivery Boys</h2>
 
       {loading ? (
         <div className="bg-white p-5 rounded-lg text-gray-600 shadow">Loading delivery boys...</div>
