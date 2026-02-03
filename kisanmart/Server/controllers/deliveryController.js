@@ -125,9 +125,9 @@ export const getAssignedOrders = async (req, res) => {
 export const getDeliveryStats = async (req, res) => {
   try {
     const { deliveryBoyId } = req.body
-    
+
     const orders = await Order.find({ deliveryBoyId })
-    
+
     const stats = {
       pending: 0,
       inProgress: 0,
@@ -138,19 +138,19 @@ export const getDeliveryStats = async (req, res) => {
       thisWeekOrders: 0,
       thisMonthOrders: 0,
     }
-    
+
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    
+
     const weekAgo = new Date()
     weekAgo.setDate(weekAgo.getDate() - 7)
-    
+
     const monthAgo = new Date()
     monthAgo.setMonth(monthAgo.getMonth() - 1)
-    
+
     orders.forEach((order) => {
       const orderDate = new Date(order.createdAt)
-      
+
       // Count by status
       if (order.status === 'Assigned to delivery' || order.status === 'pending') {
         stats.pending++
@@ -161,13 +161,13 @@ export const getDeliveryStats = async (req, res) => {
         // Calculate earnings (assuming 5% commission or fixed amount)
         stats.totalEarnings += order.amount * 0.05 // 5% commission
       }
-      
+
       // Count by time period
       if (orderDate >= today) stats.todayOrders++
       if (orderDate >= weekAgo) stats.thisWeekOrders++
       if (orderDate >= monthAgo) stats.thisMonthOrders++
     })
-    
+
     return res.json({ success: true, stats })
   } catch (error) {
     console.error('getDeliveryStats', error)
@@ -219,10 +219,22 @@ export const assignOrder = async (req, res) => {
 // admin: list delivery boys
 export const listDeliveryBoys = async (req, res) => {
   try {
-    const list = await DeliveryBoy.find().select('-password')
+    const list = await DeliveryBoy.find()
     return res.json({ success: true, list })
   } catch (error) {
     console.error('listDeliveryBoys', error)
+    res.json({ success: false, message: error.message })
+  }
+}
+
+// admin: remove delivery boy
+export const removeDeliveryBoy = async (req, res) => {
+  try {
+    const { id } = req.body
+    await DeliveryBoy.findByIdAndDelete(id)
+    return res.json({ success: true, message: 'Delivery boy removed' })
+  } catch (error) {
+    console.error('removeDeliveryBoy', error)
     res.json({ success: false, message: error.message })
   }
 }

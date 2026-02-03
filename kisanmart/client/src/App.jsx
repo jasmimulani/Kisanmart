@@ -33,12 +33,12 @@ import DeliveryList from './Pages/Seller/DeliveryList'
 import CreateDelivery from './Pages/Seller/CreateDelivery'
 import Dashboard from './Pages/Delivery/Dashboard';
 const App = () => {
-  const isSellerPath = useLocation().pathname.includes("seller")
+  const isPanelPath = useLocation().pathname.includes("seller") || useLocation().pathname.includes("delivery")
   const { showUserLogin, isSeller, isDelivery } = useAppContext()
 
   return (
     <div className='text-default min-h-screen text-gray-700 bg-white'>
-      {!isSellerPath && <Navbar />}
+      {!isPanelPath && <Navbar />}
       {showUserLogin && <Login />}
       <Toaster
         position="top-right" // required by library, but we override with containerStyle below
@@ -67,7 +67,7 @@ const App = () => {
         }}
       />
 
-      <div className={`${isSellerPath ? "" : " px-6 md:px-16 lg:px-24 xl:px-32"} `}>
+      <div className={`${isPanelPath ? "" : " px-6 md:px-16 lg:px-24 xl:px-32"} `}>
         <Routes>
           <Route path='/' element={<Home />} />
           <Route path='/products' element={<AllProduct />} />
@@ -77,19 +77,19 @@ const App = () => {
           <Route path='/add-address' element={<AddAddress />} />
           <Route path='/my-orders' element={<MyOrder />} />
           <Route path='/loader' element={<Loading />} />
-          <Route path='/about' element={<About/>} />
-          <Route path='/contact' element={<ContactUs/>} />
+          <Route path='/about' element={<About />} />
+          <Route path='/contact' element={<ContactUs />} />
 
           {/* Seller Routes */}
           <Route path="/seller" element={<Navigate to="/seller/login" />} />
           <Route path="/seller/login" element={<SellerLogin />} />
           <Route path="/seller/dashboard" element={isSeller ? <SellerLayout /> : <Navigate to="/seller/login" />}>
-            <Route index element={<AdminProfile/>} />
+            <Route index element={<AdminProfile />} />
             <Route path="add-product" element={<AddProduct />} />
             <Route path="product-list" element={<ProductList />} />
             <Route path="delivery-list" element={<DeliveryList />} />
             <Route path="create-delivery" element={<CreateDelivery />} />
-            <Route path="user-list" element={<UserList/>} />
+            <Route path="user-list" element={<UserList />} />
             <Route path="orders" element={<Orders />} />
           </Route>
 
@@ -98,8 +98,8 @@ const App = () => {
           <Route path="/delivery/register" element={<DeliveryRegister />} />
           <Route path="/delivery/login" element={<DeliveryLogin />} />
           <Route path="/delivery/claim" element={<DeliveryClaim />} />
-          <Route 
-            path="/delivery" 
+          <Route
+            path="/delivery"
             element={isDelivery ? <DeliveryLayout /> : <Navigate to="/delivery/login" replace />}
           >
             <Route index element={<Dashboard />} />
@@ -107,11 +107,11 @@ const App = () => {
             <Route path="orders" element={<DeliveryOrders />} />
             <Route path="profile" element={<DeliveryProfile />} />
           </Route>
-</Routes>
-        
+        </Routes>
+
       </div>
 
-      {!isSellerPath && <Fotter />}
+      {!isPanelPath && <Fotter />}
     </div>
   )
 }

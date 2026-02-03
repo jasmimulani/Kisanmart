@@ -13,6 +13,7 @@ import {
   listDeliveryBoys,
   createDeliveryByAdmin,
   claimDeliveryToken,
+  removeDeliveryBoy,
 } from '../controllers/deliveryController.js'
 import authDeliveryBoy from '../middlewares/authDeliveryBoy.js'
 import authSeller from '../middlewares/authSeller.js'
@@ -38,6 +39,9 @@ router.get('/list', authSeller, listDeliveryBoys)
 
 // Admin: create delivery boy and return token/credentials
 router.post('/create', authSeller, createDeliveryByAdmin)
+
+// Admin: remove delivery boy
+router.post('/remove', authSeller, removeDeliveryBoy)
 
 // Delivery: claim a token to set auth cookie (used by delivery boy via link)
 router.post('/claim', claimDeliveryToken)
